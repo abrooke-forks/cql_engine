@@ -31,29 +31,41 @@ If the argument is null, the result is null.
 public class ToStringEvaluator extends org.cqframework.cql.elm.execution.ToString {
 
   @Override
+  public Object doOperation(Boolean operand) {
+    return Boolean.toString(operand);
+  }
+
+  @Override
+  public Object doOperation(Integer operand) {
+    return Integer.toString(operand);
+  }
+
+  @Override
+  public Object doOperation(BigDecimal operand) {
+    return operand.toString();
+  }
+
+  @Override
+  public Object doOperation(Quantity operand) {
+    return operand.getValue().toString() + operand.getUnit();
+  }
+
+  @Override
+  public Object doOperation(DateTime operand) {
+    return operand.getPartial().toString();
+  }
+
+  @Override
+  public Object doOperation(Time operand) {
+    return operand.getPartial().toString();
+  }
+
+  @Override
   public Object evaluate(Context context) {
     Object operand = getOperand().evaluate(context);
 
     if (operand == null) { return null; }
 
-    if (operand instanceof Integer) {
-      return Integer.toString((Integer)operand);
-    }
-    else if (operand instanceof BigDecimal) {
-      return ((BigDecimal)operand).toString();
-    }
-    else if (operand instanceof Quantity) {
-      return (((Quantity)operand).getValue()).toString() + ((Quantity)operand).getUnit();
-    }
-    else if (operand instanceof Boolean) {
-      return Boolean.toString((Boolean)operand);
-    }
-    else if (operand instanceof DateTime) {
-      return ((DateTime)operand).getPartial().toString();
-    }
-    else if (operand instanceof Time) {
-      return ((Time)operand).getPartial().toString();
-    }
-    throw new IllegalArgumentException(String.format("Cannot ToString a value of type %s.", operand.getClass().getName()));
+    return Execution.resolveTypeDoOperation(this, operand);
   }
 }

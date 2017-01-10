@@ -16,19 +16,23 @@ The flatten operator flattens a list of lists into a single list.
 public class FlattenEvaluator extends org.cqframework.cql.elm.execution.Flatten {
 
     @Override
-    public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
-        if (value == null) {
-            return null;
-        }
-
+    public Object doOperation(Iterable<Object> operand) {
         ArrayList resultList = new ArrayList();
-        for (Object element : (Iterable)value) {
+        for (Object element : (Iterable)operand) {
             for (Object subElement : (Iterable)element) {
                 resultList.add(subElement);
             }
         }
 
         return resultList;
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = getOperand().evaluate(context);
+
+        if (operand == null) { return null; }
+
+        return Execution.resolveListDoOperation(this, operand);
     }
 }

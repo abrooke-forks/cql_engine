@@ -1,8 +1,7 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Quantity;
-import java.util.Iterator;
+
 import java.math.BigDecimal;
 
 /*
@@ -20,44 +19,25 @@ Avg(argument List<Quantity>) Quantity
 */
 public class AvgEvaluator extends org.cqframework.cql.elm.execution.Avg {
 
-  public static Object avg(Object source) {
-    BigDecimal avg = new BigDecimal(0);
+  @Override
+  public Object doOperation(Iterable<Object> operand) {
     int size = 0;
-
-    if (source instanceof Iterable) {
-      Iterable<Object> element = (Iterable<Object>)source;
-      Iterator<Object> itr = element.iterator();
-
-      if (!itr.hasNext()) { return null; } // empty list
-
-      while (itr.hasNext()) {
-        Object value = itr.next();
-        if (value == null) { continue; }
-        ++size;
-
-        if (value instanceof BigDecimal) {
-          avg = avg.add((BigDecimal)value);
-        }
-        else if (value instanceof Quantity) {
-          avg = avg.add(((Quantity)value).getValue());
-        }
-        else {
-          throw new IllegalArgumentException(String.format("Cannot Average arguments of type '%s'.", value.getClass().getName()));
-        }
-      }
+    for (Object value : operand) {
+      if (value != null) { size++; }
     }
-    else { return null; } // TODO: maybe throw exception here?
 
     if (size == 0) { return null; } // all elements null
-    return avg.divide(new BigDecimal(size));
+    return Execution.resolveArithmeticDoOperation(
+            new DivideEvaluator(), Execution.resolveAggregateDoOperation(
+                    new SumEvaluator(), operand), new BigDecimal(size));
   }
 
   @Override
   public Object evaluate(Context context) {
+    Object operand = getSource().evaluate(context);
 
-    Object source = getSource().evaluate(context);
-    if (source == null) { return null; }
+    if ((Boolean) new IsNullEvaluator().doOperation((Iterable<Object>) operand)) { return null; }
 
-    return avg(source);
+    return Execution.resolveAggregateDoOperation(this, operand);
   }
 }

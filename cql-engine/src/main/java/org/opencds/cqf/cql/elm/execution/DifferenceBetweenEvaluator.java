@@ -1,17 +1,12 @@
 package org.opencds.cqf.cql.elm.execution;
 
+import org.joda.time.*;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Time;
-
-// for Uncertainty
-import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.runtime.Uncertainty;
 
-import java.util.Arrays;
-import java.util.ArrayList;
-
-import org.joda.time.*;
+// for Uncertainty
 
 /*
 difference in precision between(low DateTime, high DateTime) Integer
@@ -42,120 +37,80 @@ DateTime(2014, 5, 12) and DateTime(2014, 5, 25) respectively
 */
 public class DifferenceBetweenEvaluator extends org.cqframework.cql.elm.execution.DifferenceBetween {
 
-  public static Integer between(Partial leftTrunc, Partial rightTrunc, int idx, boolean dt) {
-    Integer ret = 0;
-    switch(idx) {
-      case 0: ret = Years.yearsBetween(leftTrunc, rightTrunc).getYears();
-              break;
-      case 1: ret = Months.monthsBetween(leftTrunc, rightTrunc).getMonths();
-              break;
-      case 2: ret = Days.daysBetween(leftTrunc, rightTrunc).getDays();
-              break;
-      case 3: ret = Hours.hoursBetween(leftTrunc, rightTrunc).getHours();
-              break;
-      case 4: ret = Minutes.minutesBetween(leftTrunc, rightTrunc).getMinutes();
-              break;
-      case 5: ret = Seconds.secondsBetween(leftTrunc, rightTrunc).getSeconds();
-              break;
-      case 6: ret = Seconds.secondsBetween(leftTrunc, rightTrunc).getSeconds() * 1000;
-              // now do the actual millisecond DifferenceBetween - add to ret
-              if (dt) { ret += rightTrunc.getValue(idx) - leftTrunc.getValue(idx); }
-              else { ret += rightTrunc.getValue(idx - 3) - leftTrunc.getValue(idx - 3); }
-              break;
+  private String precision;
+  public void setPrecision(String precision) {
+    this.precision = precision;
+  }
+
+  public DifferenceBetweenEvaluator withPrecision(String precision) {
+    setPrecision(precision);
+    return this;
+  }
+
+  private Partial truncatePartial(DateTime source, int size) {
+    int [] a = new int[size + 1];
+    for (int i = 0; i < size + 1; ++i) {
+      a[i] = source.getPartial().getValue(i);
     }
-    return ret;
+    return new Partial(DateTime.getFields(size + 1), a);
+  }
+
+  private Partial truncatePartial(Time source, int size) {
+    int [] a = new int[size + 1];
+    for (int i = 0; i < size + 1; ++i) {
+      a[i] = source.getPartial().getValue(i);
+    }
+    return new Partial(Time.getFields(size + 1), a);
+  }
+
+  @Override
+  public Object doOperation(DateTime leftOperand, DateTime rightOperand) {
+    int idx = DateTime.getFieldIndex(precision);
+
+    if (Uncertainty.isUncertain(leftOperand, precision) || Uncertainty.isUncertain(rightOperand, precision)) {
+      return new DurationBetweenEvaluator().withPrecision(precision).doOperation(leftOperand, rightOperand);
+    }
+
+    if (idx != -1) {
+      DateTime leftTrunc = new DateTime().withPartial(truncatePartial(leftOperand, idx))
+                                         .withTimezoneOffset(leftOperand.getTimezoneOffset());
+      DateTime rightTrunc = new DateTime().withPartial(truncatePartial(rightOperand, idx))
+                                          .withTimezoneOffset(rightOperand.getTimezoneOffset());
+
+      return new DurationBetweenEvaluator().withPrecision(precision).doOperation(leftTrunc, rightTrunc);
+    }
+
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
+  }
+
+  @Override
+  public Object doOperation(Time leftOperand, Time rightOperand) {
+    int idx = Time.getFieldIndex(precision);
+
+    if (Uncertainty.isUncertain(leftOperand, precision) || Uncertainty.isUncertain(rightOperand, precision)) {
+      return new DurationBetweenEvaluator().withPrecision(precision).doOperation(leftOperand, rightOperand);
+    }
+
+    if (idx != -1) {
+      Time leftTrunc = new Time().withPartial(truncatePartial(leftOperand, idx))
+                                 .withTimezoneOffset(leftOperand.getTimezoneOffset());
+      Time rightTrunc = new Time().withPartial(truncatePartial(rightOperand, idx))
+                                  .withTimezoneOffset(rightOperand.getTimezoneOffset());
+
+      return new DurationBetweenEvaluator().withPrecision(precision).doOperation(leftTrunc, rightTrunc);
+    }
+
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
   }
 
   @Override
   public Object evaluate(Context context) {
     Object left = getOperand().get(0).evaluate(context);
     Object right = getOperand().get(1).evaluate(context);
-    String precision = getPrecision().value();
-
-    if (precision == null) {
-      throw new IllegalArgumentException("Precision must be specified.");
-    }
+    precision = getPrecision().value();
 
     if (left == null || right == null) { return null; }
 
-    if (left instanceof DateTime && right instanceof DateTime) {
-      DateTime leftDT = (DateTime)left;
-      DateTime rightDT = (DateTime)right;
-
-      int idx = DateTime.getFieldIndex(precision);
-
-      if (idx != -1) {
-
-        // Uncertainty
-        if (Uncertainty.isUncertain(leftDT, precision)) {
-          ArrayList<DateTime> highLow = Uncertainty.getHighLowList(leftDT, precision);
-          return new Uncertainty().withUncertaintyInterval(new Interval(between(highLow.get(1).getPartial(), rightDT.getPartial(), idx, true), true, between(highLow.get(0).getPartial(), rightDT.getPartial(), idx , true), true));
-        }
-
-        else if (Uncertainty.isUncertain(rightDT, precision)) {
-          ArrayList<DateTime> highLow = Uncertainty.getHighLowList(rightDT, precision);
-          return new Uncertainty().withUncertaintyInterval(new Interval(between(leftDT.getPartial(), highLow.get(0).getPartial(), idx, true), true, between(leftDT.getPartial(), highLow.get(1).getPartial(), idx, true), true));
-        }
-
-        // truncate Partial
-        int [] a = new int[idx + 1];
-        int [] b = new int[idx + 1];
-
-        for (int i = 0; i < idx + 1; ++i) {
-          a[i] = leftDT.getPartial().getValue(i);
-          b[i] = rightDT.getPartial().getValue(i);
-        }
-
-        Partial leftTrunc = new Partial(DateTime.getFields(idx + 1), a);
-        Partial rightTrunc = new Partial(DateTime.getFields(idx + 1), b);
-
-        return between(leftTrunc, rightTrunc, idx, true);
-      }
-
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-      }
-    }
-
-    if (left instanceof Time && right instanceof Time) {
-      Time leftT = (Time)left;
-      Time rightT = (Time)right;
-
-      int idx = Time.getFieldIndex(precision);
-
-      if (idx != -1) {
-
-        // Uncertainty
-        if (Uncertainty.isUncertain(leftT, precision)) {
-          ArrayList<Time> highLow = Uncertainty.getHighLowList(leftT, precision);
-          return new Uncertainty().withUncertaintyInterval(new Interval(between(highLow.get(1).getPartial(), rightT.getPartial(), idx, false), true, between(highLow.get(0).getPartial(), rightT.getPartial(), idx, false), true));
-        }
-
-        else if (Uncertainty.isUncertain(rightT, precision)) {
-          ArrayList<Time> highLow = Uncertainty.getHighLowList(rightT, precision);
-          return new Uncertainty().withUncertaintyInterval(new Interval(between(leftT.getPartial(), highLow.get(0).getPartial(), idx, false), true, between(leftT.getPartial(), highLow.get(1).getPartial(), idx, false), true));
-        }
-
-        // truncate Partial
-        int [] a = new int[idx + 1];
-        int [] b = new int[idx + 1];
-
-        for (int i = 0; i < idx + 1; ++i) {
-          a[i] = leftT.getPartial().getValue(i);
-          b[i] = rightT.getPartial().getValue(i);
-        }
-
-        Partial leftTrunc = new Partial(Time.getFields(idx + 1), a);
-        Partial rightTrunc = new Partial(Time.getFields(idx + 1), b);
-
-        return between(leftTrunc, rightTrunc, idx + 3, false);
-      }
-
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-      }
-    }
-
-    throw new IllegalArgumentException(String.format("Cannot DifferenceBetween arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+    return Execution.resolveDateTimeDoOperation(this, left, right);
   }
 }

@@ -13,8 +13,12 @@
 // FALSE	| TRUE	TRUE	TRUE
 // NULL	| TRUE	NULL	NULL
 // */
+
+///////////// TODO: this is not in the 1.1.0-SNAPSHOT version of the translator
+
+//import org.opencds.cqf.cql.execution.Context;
 //
-// /**
+///**
 //  * Created by Bryn on 5/25/2016.
 //  */
 // public class ImpliesEvaluator extends org.cqframework.cql.elm.execution.Implies {

@@ -38,12 +38,13 @@ define ToDateTimeMalformed: ToDateTime('2014/01/01T12:05:05.955Z')
 
 //ToDecimal
 define String25D5ToDecimal: ToDecimal('+25.5')
+define StringInvalid: ToDecimal('22.2b')
 
 //ToInteger
 define StringNeg25ToInteger: ToInteger('-25')
 
 //ToQuantity
-define String5D5CMToQuantity: ToQuantity('5.5 cm')
+define String5D5CMToQuantity: ToQuantity('5.5cm')
 
 //ToString
 define IntegerNeg5ToString: ToString(-5)

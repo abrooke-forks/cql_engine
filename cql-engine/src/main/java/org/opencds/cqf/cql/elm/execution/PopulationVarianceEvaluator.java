@@ -1,12 +1,9 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Quantity;
-import org.opencds.cqf.cql.runtime.Value;
-import java.util.Iterator;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
 PopulationVariance(argument List<Decimal>) Decimal
@@ -23,50 +20,26 @@ Return types: BigDecimal & Quantity
 */
 public class PopulationVarianceEvaluator extends org.cqframework.cql.elm.execution.PopulationVariance {
 
-  public static Object popVariance(Object source) {
-    if (source instanceof Iterable) {
-      Iterable<Object> element = (Iterable<Object>)source;
-      Iterator<Object> itr = element.iterator();
+  @Override
+  public Object doOperation(Iterable<Object> operand) {
+    Object mean = new AvgEvaluator().doOperation(operand);
 
-      if (!itr.hasNext()) { return null; } // empty list
+    List<Object> newVals = new ArrayList<>();
 
-      DescriptiveStatistics stats = new DescriptiveStatistics();
-      Object value = itr.next();
-      while (value == null) { value = itr.next(); }
-      if (!itr.hasNext()) { return null; } // no non-null elements
+    operand.forEach(ae -> newVals.add(
+            Execution.resolveArithmeticDoOperation(new MultiplyEvaluator(),
+                    Execution.resolveArithmeticDoOperation(new SubtractEvaluator(), ae, mean),
+                    Execution.resolveArithmeticDoOperation(new SubtractEvaluator(), ae, mean))));
 
-      if (value instanceof BigDecimal) {
-        stats.addValue(((BigDecimal)value).doubleValue());
-        while (itr.hasNext()) {
-          BigDecimal next = (BigDecimal)itr.next();
-          if (next != null) { stats.addValue(next.doubleValue()); }
-        }
-
-        BigDecimal retVal = new BigDecimal(stats.getPopulationVariance());
-        return retVal.precision() > 8 ? retVal.setScale(8, RoundingMode.FLOOR) : retVal;
-      }
-
-      else if (value instanceof Quantity) {
-        stats.addValue((((Quantity)value).getValue()).doubleValue());
-        while (itr.hasNext()) {
-          BigDecimal next = ((Quantity)itr.next()).getValue();
-          if (next != null) { stats.addValue(next.doubleValue()); }
-        }
-        Quantity retVal = new Quantity().withValue(new BigDecimal(stats.getPopulationVariance()))
-                                        .withUnit(((Quantity)value).getUnit());
-        return retVal.getValue().precision() > 8 ? retVal.withValue(retVal.getValue().setScale(8, RoundingMode.FLOOR)) : retVal;
-      }
-
-      throw new IllegalArgumentException(String.format("Cannot PopulationVariance List arguments of type '%s'.", value.getClass().getName()));
-    }
-    throw new IllegalArgumentException(String.format("Invalid instance '%s' for PopulationVariance operation.", source.getClass().getName()));
+    return Execution.resolveAggregateDoOperation(new AvgEvaluator(), newVals);
   }
 
   @Override
   public Object evaluate(Context context) {
-    Object source = getSource().evaluate(context);
-    if (source == null) { return null; }
+    Object operand = getSource().evaluate(context);
 
-    return popVariance(source);
+    if ((Boolean) new IsNullEvaluator().doOperation((Iterable<Object>) operand)) { return null; }
+
+    return Execution.resolveAggregateDoOperation(this, operand);
   }
 }

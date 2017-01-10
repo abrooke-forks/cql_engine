@@ -22,25 +22,24 @@ If precision is not specified or null, 0 is assumed.
 public class RoundEvaluator extends org.cqframework.cql.elm.execution.Round {
 
     @Override
+    public Object doOperation(BigDecimal operand) {
+        RoundingMode rm = operand.compareTo(new BigDecimal("0")) < 0 ? RoundingMode.HALF_DOWN : RoundingMode.HALF_UP;
+        return operand.setScale(0, rm);
+    }
+
+    @Override
+    public Object doOperation(BigDecimal leftOperand, Integer rightOperand) {
+        RoundingMode rm = leftOperand.compareTo(new BigDecimal("0")) < 0 ? RoundingMode.HALF_DOWN : RoundingMode.HALF_UP;
+        return leftOperand.setScale(rightOperand, rm);
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
-        Object precisionValue = getPrecision() == null ? null : getPrecision().evaluate(context);
-        //BigDecimal precision = new BigDecimal((precisionValue == null ? 0 : (Integer)precisionValue));
-        RoundingMode rm = RoundingMode.HALF_UP;
+        Object left = getOperand().evaluate(context);
+        Object right = getPrecision() == null ? null : getPrecision().evaluate(context);
 
-        if (value == null) { return null; }
+        if (left == null) { return null; }
 
-        if (((BigDecimal)value).compareTo(new BigDecimal(0)) < 0) { rm = RoundingMode.HALF_DOWN; }
-
-        if (value instanceof BigDecimal){
-            if (precisionValue == null || ((Integer)precisionValue == 0)) {
-                return ((BigDecimal)value).setScale(0, rm);
-            }
-            else {
-                return ((BigDecimal)value).setScale((Integer)precisionValue, rm);
-            }
-        }
-
-        throw new IllegalArgumentException(String.format("Cannot Round with argument of type '%s'.", value.getClass().getName()));
+        return Execution.resolveArithmeticDoOperation(this, left, right);
     }
 }

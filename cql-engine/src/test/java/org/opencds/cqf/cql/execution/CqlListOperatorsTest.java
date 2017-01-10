@@ -117,8 +117,8 @@ public class CqlListOperatorsTest extends CqlExecutionTestBase {
         result = context.resolveExpressionRef("EqualDateTimeFalse").getExpression().evaluate(context);
         assertThat(result, is(false));
 
-        result = context.resolveExpressionRef("EqualDateTimeNull").getExpression().evaluate(context);
-        assertThat(result, is(nullValue()));
+        result = context.resolveExpressionRef("EqualDateTimeFalse2").getExpression().evaluate(context);
+        assertThat(result, is(false));
 
         result = context.resolveExpressionRef("EqualTimeTrue").getExpression().evaluate(context);
         assertThat(result, is(true));
@@ -181,6 +181,33 @@ public class CqlListOperatorsTest extends CqlExecutionTestBase {
     }
 
     /**
+     * {@link org.opencds.cqf.cql.elm.execution.First#evaluate(Context)}
+     */
+    @Test
+    public void testFirst() throws JAXBException {
+        Context context = new Context(library);
+        Object result;
+
+        result = context.resolveExpressionRef("FirstEmpty").getExpression().evaluate(context);
+        assertThat(result, is(nullValue()));
+
+        result = context.resolveExpressionRef("FirstNull1").getExpression().evaluate(context);
+        assertThat(result, is(nullValue()));
+
+        result = context.resolveExpressionRef("First1Null").getExpression().evaluate(context);
+        assertThat(result, is(1));
+
+        result = context.resolveExpressionRef("First12").getExpression().evaluate(context);
+        assertThat(result, is(1));
+
+        result = context.resolveExpressionRef("FirstDateTime").getExpression().evaluate(context);
+        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 5, 10})));
+
+        result = context.resolveExpressionRef("FirstTime").getExpression().evaluate(context);
+        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {15, 59, 59, 999})));
+    }
+
+    /**
      * {@link org.opencds.cqf.cql.elm.execution.Flatten#evaluate(Context)}
      */
     @Test
@@ -206,33 +233,6 @@ public class CqlListOperatorsTest extends CqlExecutionTestBase {
         assertThat(((Time)((ArrayList<Object>)result).get(0)).getPartial(), is(new Partial(Time.getFields(4), new int[] {15, 59, 59, 999})));
         assertThat(((Time)((ArrayList<Object>)result).get(1)).getPartial(), is(new Partial(Time.getFields(4), new int[] {20, 59, 59, 999})));
         assertThat(((ArrayList<Object>)result).size(), is(2));
-    }
-
-    /**
-     * {@link org.opencds.cqf.cql.elm.execution.First#evaluate(Context)}
-     */
-    @Test
-    public void testFirst() throws JAXBException {
-        Context context = new Context(library);
-        Object result;
-
-        result = context.resolveExpressionRef("FirstEmpty").getExpression().evaluate(context);
-        assertThat(result, is(nullValue()));
-
-        result = context.resolveExpressionRef("FirstNull1").getExpression().evaluate(context);
-        assertThat(result, is(nullValue()));
-
-        result = context.resolveExpressionRef("First1Null").getExpression().evaluate(context);
-        assertThat(result, is(1));
-
-        result = context.resolveExpressionRef("First12").getExpression().evaluate(context);
-        assertThat(result, is(1));
-
-        result = context.resolveExpressionRef("FirstDateTime").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 5, 10})));
-
-        result = context.resolveExpressionRef("FirstTime").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {15, 59, 59, 999})));
     }
 
     /**

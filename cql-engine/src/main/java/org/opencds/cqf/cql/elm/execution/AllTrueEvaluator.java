@@ -16,27 +16,30 @@ If the source is null, the result is null.
  * Created by Bryn on 5/25/2016.
  */
 public class AllTrueEvaluator extends org.cqframework.cql.elm.execution.AllTrue {
+
     @Override
-    public Object evaluate(Context context) {
+    public Object doOperation(Iterable<Object> operand) {
+        Iterator<Object> elemsItr = operand.iterator();
 
-        Object src = getSource().evaluate(context);
-        if (src == null) { return null; }
+        if (!elemsItr.hasNext()) { return null; } // empty list
 
-        if(src instanceof Iterable) {
-          Iterable<Object> element = (Iterable<Object>)src;
-          Iterator<Object> elemsItr = element.iterator();
-          if (!elemsItr.hasNext()) { return null; } // empty list
-          while (elemsItr.hasNext()) {
-              Object exp = elemsItr.next();
-              if (exp == null) { continue; } // skip null
-              Boolean boolVal = (Boolean) exp;
-
-              if (boolVal == null || Boolean.FALSE == boolVal) return false;
-          }
-        }else{
-            return null;
+        while (elemsItr.hasNext()) {
+            Object exp = elemsItr.next();
+            if (exp == null) { continue; } // skip null
+            Boolean boolVal = (Boolean) exp;
+            if (Boolean.FALSE == boolVal) return false;
         }
 
         return true;
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = getSource().evaluate(context);
+
+        // The list may contain all nulls for this list operator
+        if (operand == null) { return null; }
+
+        return Execution.resolveAggregateDoOperation(this, operand);
     }
 }

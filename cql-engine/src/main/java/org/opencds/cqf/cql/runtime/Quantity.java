@@ -30,6 +30,10 @@ public class Quantity {
         return this;
     }
 
+    public Integer compareTo(Quantity other) {
+        return this.getValue().compareTo(other.getValue());
+    }
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof Quantity)) {

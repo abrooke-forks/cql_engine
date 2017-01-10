@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
+
 import java.math.BigDecimal;
 
 /*
@@ -23,25 +24,28 @@ If the argument is null, the result is null.
 public class ToDecimalEvaluator extends org.cqframework.cql.elm.execution.ToDecimal {
 
     @Override
+    public Object doOperation(String operand) {
+        try {
+            return new BigDecimal(operand);
+        }
+        catch (NumberFormatException nfe) {
+            throw new IllegalArgumentException("Unable to convert given string to Decimal");
+        }
+    }
+
+    // NOTE: the following method signature is not part of the spec
+    // this is used for implicit conversions to decimal
+    @Override
+    public Object doOperation(Integer operand) {
+        return new BigDecimal(operand);
+    }
+
+    @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-        if (operand == null) {
-            return null;
-        }
 
-        if (operand instanceof Integer) {
-            return new BigDecimal((Integer)operand);
-        }
+        if (operand == null) { return null; }
 
-        if (operand instanceof String) {
-          try { // added error checking - not sure if this is handled during translation -- Chris Schuler
-            return new BigDecimal((String)operand);
-          }
-          catch (NumberFormatException nfe) {
-            throw new IllegalArgumentException("Unable to convert given string to Decimal");
-          }
-        }
-
-        throw new IllegalArgumentException(String.format("Cannot call %s with argument of type '%s'.", this.getClass().getSimpleName(), operand.getClass().getName()));
+        return Execution.resolveTypeDoOperation(this, operand);
     }
 }

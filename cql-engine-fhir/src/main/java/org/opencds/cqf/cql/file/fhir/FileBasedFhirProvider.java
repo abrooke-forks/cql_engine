@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.joda.time.Partial;
 import org.opencds.cqf.cql.data.fhir.BaseFhirDataProvider;
+import org.opencds.cqf.cql.elm.execution.Execution;
 import org.opencds.cqf.cql.elm.execution.InEvaluator;
 import org.opencds.cqf.cql.elm.execution.IncludesEvaluator;
 import org.opencds.cqf.cql.runtime.Code;
@@ -13,21 +14,16 @@ import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.terminology.ValueSetInfo;
 import org.opencds.cqf.cql.terminology.fhir.FhirTerminologyProvider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.net.URL;
-import java.net.URLClassLoader;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /*
 What the heck does this thing do?
@@ -168,7 +164,7 @@ public class FileBasedFhirProvider extends BaseFhirDataProvider {
             date = toDateTime((DateTimeType)temp);
           }
 
-          if (date != null && InEvaluator.in(date, expanded)) {
+          if (date != null && (Boolean) Execution.resolveSharedDoOperation(new InEvaluator(), date, expanded)) {
             results.add(res);
           }
           else {
@@ -190,7 +186,7 @@ public class FileBasedFhirProvider extends BaseFhirDataProvider {
           Interval highLowDtInterval = new Interval(lowDt, true, highDt, true);
 
           // Now the Includes operation
-          if ((Boolean)IncludesEvaluator.includes(expanded, highLowDtInterval)) {
+          if ((Boolean) Execution.resolveSharedDoOperation(new IncludesEvaluator(), expanded, highLowDtInterval)) {
               results.add(res);
           }
           else {

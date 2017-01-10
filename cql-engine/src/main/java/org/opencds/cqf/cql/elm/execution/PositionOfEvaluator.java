@@ -16,18 +16,17 @@ If either argument is null, the result is null.
 public class PositionOfEvaluator extends org.cqframework.cql.elm.execution.PositionOf {
 
     @Override
+    public Object doOperation(String leftOperand, String rightOperand) {
+        return rightOperand.indexOf(leftOperand);
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        Object pattern = getPattern().evaluate(context);
-        Object string = getString().evaluate(context);
+        Object left = getPattern().evaluate(context);
+        Object right = getString().evaluate(context);
 
-        if (pattern == null || string == null) {
-            return null;
-        }
+        if (left == null || right == null) { return null; }
 
-        if (pattern instanceof String) {
-            return ((String)string).indexOf((String)pattern);
-        }
-
-        throw new IllegalArgumentException(String.format("Cannot %s arguments of type '%s'.", this.getClass().getSimpleName(), pattern.getClass().getName()));
+        return Execution.resolveStringDoOperation(this, left, right);
     }
 }

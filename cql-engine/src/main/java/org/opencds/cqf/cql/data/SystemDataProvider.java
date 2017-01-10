@@ -106,6 +106,7 @@ public class SystemDataProvider implements DataProvider {
     @Override
     public Class resolveType(String typeName) {
         switch (typeName) {
+            case "Any": return Object.class;
             case "Boolean": return Boolean.class;
             case "Integer": return Integer.class;
             case "Decimal": return BigDecimal.class;

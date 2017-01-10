@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
 
 /*
 ends(left Interval<T>, right Interval<T>) Boolean
@@ -20,20 +19,29 @@ If either argument is null, the result is null.
 public class EndsEvaluator extends org.cqframework.cql.elm.execution.Ends {
 
   @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    Object leftStart = leftOperand.getStart();
+    Object leftEnd = leftOperand.getEnd();
+    Object rightStart = rightOperand.getStart();
+    Object rightEnd = rightOperand.getEnd();
+
+    if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
+
+    Boolean within = (Boolean) Execution.resolveComparisonDoOperation(new GreaterOrEqualEvaluator(), leftStart, rightStart);
+    Boolean equalEnd = (Boolean) Execution.resolveComparisonDoOperation(new EqualEvaluator(), leftEnd, rightEnd);
+
+    return within == null || equalEnd == null ? null : within && equalEnd;
+  }
+
+  @Override
   public Object evaluate(Context context) {
-    Interval leftInterval = (Interval)getOperand().get(0).evaluate(context);
-    Interval rightInterval = (Interval)getOperand().get(1).evaluate(context);
+    Object left = getOperand().get(0).evaluate(context);
+    Object right = getOperand().get(1).evaluate(context);
 
-    if (leftInterval != null && rightInterval != null) {
-      Object leftStart = leftInterval.getStart();
-      Object leftEnd = leftInterval.getEnd();
-      Object rightStart = rightInterval.getStart();
-      Object rightEnd = rightInterval.getEnd();
-
-      if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
-
-      return (Value.compareTo(leftStart, rightStart, ">=") && Value.compareTo(leftEnd, rightEnd, "=="));
+    if (left == null || right == null) {
+      return null;
     }
-    return null;
+
+    return Execution.resolveIntervalDoOperation(this, left, right);
   }
 }

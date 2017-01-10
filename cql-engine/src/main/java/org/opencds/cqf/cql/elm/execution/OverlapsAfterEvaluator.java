@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
 
 /*
 overlaps after(left Interval<T>, right Interval<T>) Boolean
@@ -17,18 +16,18 @@ If either argument is null, the result is null.
 public class OverlapsAfterEvaluator extends org.cqframework.cql.elm.execution.OverlapsAfter {
 
   @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    return ((Boolean) Execution.resolveComparisonDoOperation(new GreaterEvaluator(), leftOperand.getEnd(), rightOperand.getEnd())
+            && (Boolean) new OverlapsEvaluator().doOperation(leftOperand, rightOperand));
+  }
+
+  @Override
   public Object evaluate(Context context) {
-    Interval left = (Interval)getOperand().get(0).evaluate(context);
-    Interval right = (Interval)getOperand().get(1).evaluate(context);
+    Object left = getOperand().get(0).evaluate(context);
+    Object right = getOperand().get(1).evaluate(context);
 
-    if (left != null && right != null) {
-      Object leftStart = left.getStart();
-      Object leftEnd = left.getEnd();
-      Object rightStart = right.getStart();
-      Object rightEnd = right.getEnd();
+    if (left == null || right == null) { return null; }
 
-      return (Value.compareTo(leftEnd, rightEnd, ">") && OverlapsEvaluator.overlaps(left, right));
-    }
-    return null;
+    return Execution.resolveIntervalDoOperation(this, left, right);
   }
 }

@@ -7,11 +7,10 @@ valueset "Feeding Intention-Breast": '2.16.840.1.113762.1.4.1045.29'
 context Population
 
 //Age
-/*define PatientExpression: Patient { Name: 'Patrick', DOB: @2014-01-01 }
-context Patient
-define AgeYears: Patient.AgeInYears()*/
+// Need a patient reference for this -- test in the FHIR engine
 
 //AgeAt
+// Need a patient reference for this -- test in the FHIR engine
 
 //CalculateAge
 // define CalculateAgeYears: CalculateAgeInYears(DateTime(2000, 1, 1))
@@ -50,13 +49,12 @@ define ConceptEquivalentTrue: Concept1 ~ Concept1
 define ConceptEquivalentFalse: Concept1 ~ Concept2
 define CodeEquivalentNull: Code1 ~ null
 define ConceptEquivalentNull: Concept1 ~ null
-// TODO: These throw translator errors
-/*define Code3: Code null from "LOINC" display 'Systolic blood pressure'
-define Concept3: Concept { Code '66071003' from "LOINC", Code null from "LOINC" } display 'Type B viral hepatitis'
+define Code3: null as Code
+define Concept3: null as Concept
 define CodeEquivalentNullTrue: Code3 ~ Code3
 define CodeEquivalentNullFalse: Code2 ~ Code3
 define ConceptEquivalentNullTrue: Concept3 ~ Concept3
-define ConceptEquivalentNullFalse: Concept2 ~ Concept3*/
+define ConceptEquivalentNullFalse: Concept2 ~ Concept3
 
 //In (Codesystem) --> MOVED TO FHIR ENGINE
 // TODO: additional tests once terminology provider is running

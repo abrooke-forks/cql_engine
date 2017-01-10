@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
 
 /*
 starts(left Interval<T>, right Interval<T>) Boolean
@@ -20,20 +19,25 @@ If either argument is null, the result is null.
 public class StartsEvaluator extends org.cqframework.cql.elm.execution.Starts {
 
   @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    Object leftStart = leftOperand.getStart();
+    Object leftEnd = leftOperand.getEnd();
+    Object rightStart = rightOperand.getStart();
+    Object rightEnd = rightOperand.getEnd();
+
+    if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
+
+    return ((Boolean) Execution.resolveComparisonDoOperation(new EqualEvaluator(), leftStart, rightStart)
+              && (Boolean) Execution.resolveComparisonDoOperation(new LessOrEqualEvaluator(), leftEnd, rightEnd));
+  }
+
+  @Override
   public Object evaluate(Context context) {
-    Interval left = (Interval)getOperand().get(0).evaluate(context);
-    Interval right = (Interval)getOperand().get(1).evaluate(context);
+    Object left = getOperand().get(0).evaluate(context);
+    Object right = getOperand().get(1).evaluate(context);
 
-    if (left != null && right != null) {
-      Object leftStart = left.getStart();
-      Object leftEnd = left.getEnd();
-      Object rightStart = right.getStart();
-      Object rightEnd = right.getEnd();
+    if (left == null || right == null) { return null; }
 
-      if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
-
-      return (Value.compareTo(leftStart, rightStart, "==") && Value.compareTo(leftEnd, rightEnd, "<="));
-    }
-    return null;
+    return Execution.resolveIntervalDoOperation(this, left, right);
   }
 }

@@ -1,7 +1,11 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
+import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Interval;
+import org.opencds.cqf.cql.runtime.Time;
+
+import java.math.BigDecimal;
 
 /*
 predecessor of<T>(argument T) T
@@ -23,13 +27,31 @@ If the argument is null, the result is null.
 public class PredecessorEvaluator extends org.cqframework.cql.elm.execution.Predecessor {
 
     @Override
+    public Object doOperation(Integer operand) {
+        return Interval.predecessor(operand);
+    }
+
+    @Override
+    public Object doOperation(BigDecimal operand) {
+        return Interval.predecessor(operand);
+    }
+
+    @Override
+    public Object doOperation(DateTime operand) {
+        return Interval.predecessor(operand);
+    }
+
+    @Override
+    public Object doOperation(Time operand) {
+        return Interval.predecessor(operand);
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
+        Object operand = getOperand().evaluate(context);
 
-        if (value == null) {
-            return null;
-        }
+        if (operand == null) { return null; }
 
-        return Interval.predecessor(value);
+        return Execution.resolveArithmeticDoOperation(this, operand);
     }
 }

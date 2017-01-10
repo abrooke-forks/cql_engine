@@ -15,14 +15,17 @@ If both arguments are true or both arguments are false, the result is false. Oth
 public class XorEvaluator extends org.cqframework.cql.elm.execution.Xor {
 
     @Override
+    public Object doOperation(Boolean leftOperand, Boolean rightOperand) {
+        return leftOperand ^ rightOperand;
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        Boolean left = (Boolean)getOperand().get(0).evaluate(context);
-        Boolean right = (Boolean)getOperand().get(1).evaluate(context);
+        Object left = getOperand().get(0).evaluate(context);
+        Object right = getOperand().get(1).evaluate(context);
 
-        if (left == null || right == null) {
-            return null;
-        }
+        if (left == null || right == null) { return null; }
 
-        return (left ^ right);
+        return Execution.resolveLogicalDoOperation(this, left, right);
     }
 }

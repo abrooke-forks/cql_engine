@@ -2,8 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
-import org.opencds.cqf.cql.runtime.DateTime;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -21,7 +19,8 @@ If either argument is null, the result is null.
 in(element T, argument List<T>) Boolean
 
 The in operator for lists returns true if the given element is in the given list.
-This operator uses the notion of equivalence to determine whether or not the element being searched for is equivalent to any element in the list.
+This operator uses the notion of equivalence to determine whether or not the element being searched for is
+  equivalent to any element in the list.
   In particular this means that if the list contains a null, and the element being searched for is null, the result will be true.
 If either argument is null, the result is null.
 */
@@ -31,14 +30,11 @@ If either argument is null, the result is null.
  */
 public class InEvaluator extends org.cqframework.cql.elm.execution.In {
 
-  public static Boolean in(Object testElement, Iterable<? extends Object> list) {
-    if (list == null) {
-        return null;
-    }
-
+  @Override
+  public Object doOperation(Object leftOperand, Iterable<Object> rightOperand) {
     boolean nullSwitch = false;
-    for (Object element : list) {
-      Boolean equiv = Value.equivalent(testElement, element);
+    for (Object element : rightOperand) {
+      Boolean equiv = (Boolean) Execution.resolveComparisonDoOperation(new EquivalentEvaluator(), leftOperand, element);
       if (equiv == null) { nullSwitch = true; }
       else if (equiv) { return true; }
     }
@@ -47,16 +43,23 @@ public class InEvaluator extends org.cqframework.cql.elm.execution.In {
     return false;
   }
 
-  public static Boolean in(Object testElement, Interval interval) {
-    if (testElement == null) { return null; }
-    Object rightStart = ((Interval)interval).getStart();
-    Object rightEnd = ((Interval)interval).getEnd();
+  @Override
+  public Object doOperation(Object leftOperand, Interval rightOperand) {
+    if (rightOperand.getStart() == null && rightOperand.getLowClosed()) { return true; }
+    else if (rightOperand.getEnd() == null && rightOperand.getHighClosed()) { return true; }
+    else if (rightOperand.getStart() == null || rightOperand.getEnd() == null) { return null; }
+    else if (leftOperand == null && (rightOperand.getStart() == null || rightOperand.getEnd() == null)) {
+      return true;
+    }
 
-    if (rightStart == null && ((Interval)interval).getLowClosed()) { return true; }
-    else if (rightEnd == null && ((Interval)interval).getHighClosed()) { return true; }
-    else if (rightStart == null || rightEnd == null) { return null; }
+    Boolean lowerBound = (Boolean) Execution.resolveComparisonDoOperation(
+            new GreaterOrEqualEvaluator(), leftOperand, rightOperand.getStart());
+    Boolean upperBound = (Boolean) Execution.resolveComparisonDoOperation(
+            new LessOrEqualEvaluator(), leftOperand, rightOperand.getEnd());
 
-    return (Value.compareTo(testElement, rightStart, ">=") && Value.compareTo(testElement, rightEnd, "<="));
+    if (lowerBound == null || upperBound == null) { return null; }
+
+    return lowerBound && upperBound;
   }
 
   @Override
@@ -66,13 +69,6 @@ public class InEvaluator extends org.cqframework.cql.elm.execution.In {
 
     if (right == null) { return null; }
 
-    if (right instanceof Interval) {
-      return in(left, (Interval)right);
-    }
-
-    else if (right instanceof Iterable) {
-      return in(left, (Iterable<Object>)right);
-    }
-    throw new IllegalArgumentException(String.format("Cannot In arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

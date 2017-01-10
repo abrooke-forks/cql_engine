@@ -31,11 +31,30 @@ If the code argument is null, the result is null.
 */
 public class InValueSetEvaluator extends org.cqframework.cql.elm.execution.InValueSet {
 
-  public Object inValueSet(Context context, Object code, Object valueset) {
-    if (code == null) { return null; }
+  private List<ValueSetInfo> valueSetInfos;
+  private TerminologyProvider provider;
+  private Context context;
 
+  public void setContext(Context context) {
+    this.context = context;
+  }
+
+  public InValueSetEvaluator withContext(Context context) {
+    setContext(context);
+    return this;
+  }
+
+  private ValueSetDef resolveVSR(Context context, ValueSetRef valueset) {
+    return context.resolveValueSetRef(valueset.getLibraryName(), valueset.getName());
+  }
+
+  private CodeSystemDef resolveCSR(Context context, CodeSystemRef codesystem) {
+    return context.resolveCodeSystemRef(codesystem.getLibraryName(), codesystem.getName());
+  }
+
+  public void setup(ValueSetRef rightOperand) {
     // Resolve ValueSetRef & CodeSystemRef -- Account for multiple codesystems represented within a valueset
-    ValueSetDef vsd = resolveVSR(context, (ValueSetRef)valueset);
+    ValueSetDef vsd = resolveVSR(context, rightOperand);
     List<CodeSystemDef> codeSystemDefs = new ArrayList<>();
     for (CodeSystemRef csr : vsd.getCodeSystem()) {
       codeSystemDefs.add(resolveCSR(context, csr));
@@ -52,51 +71,52 @@ public class InValueSetEvaluator extends org.cqframework.cql.elm.execution.InVal
       codeSystemInfos.add(new CodeSystemInfo().withId(null).withVersion(null));
     }
 
-    List<ValueSetInfo> valueSetInfos = new ArrayList<>();
+    valueSetInfos = new ArrayList<>();
     for (CodeSystemInfo csi : codeSystemInfos) {
       valueSetInfos.add(new ValueSetInfo().withId(vsd.getId()).withVersion(vsd.getVersion()).withCodeSystem(csi));
     }
 
-    TerminologyProvider provider = context.resolveTerminologyProvider();
+    provider = context.resolveTerminologyProvider();
+  }
 
-    // perform operation
-    if (code instanceof String) {
-      for (ValueSetInfo vsi : valueSetInfos) {
-        if (provider.in(new Code().withCode((String)code), vsi)) { return true; }
-      }
-      return false;
+  @Override
+  public Object doOperation(String leftOperand, ValueSetRef rightOperand) {
+    setup(rightOperand);
+    for (ValueSetInfo vsi : valueSetInfos) {
+      if (provider.in(new Code().withCode(leftOperand), vsi)) { return true; }
     }
-    else if (code instanceof Code) {
-      for (ValueSetInfo vsi : valueSetInfos) {
-        if (provider.in((Code)code, vsi)) { return true; }
-      }
-      return false;
-    }
-    else if (code instanceof Concept) {
-      for (ValueSetInfo vsi : valueSetInfos) {
-        for (Code codes : ((Concept)code).getCodes()) {
-          if (provider.in(codes, vsi)) { return true; }
-        }
-        return false;
-      }
-    }
+    return false;
+  }
 
-    throw new IllegalArgumentException(String.format("Cannot InValueSet Code arguments of type '%s'.", code.getClass().getName()));
+  @Override
+  public Object doOperation(Code leftOperand, ValueSetRef rightOperand) {
+    setup(rightOperand);
+    for (ValueSetInfo vsi : valueSetInfos) {
+      if (provider.in(leftOperand, vsi)) { return true; }
+    }
+    return false;
+  }
+
+  @Override
+  public Object doOperation(Concept leftOperand, ValueSetRef rightOperand) {
+    setup(rightOperand);
+    for (ValueSetInfo vsi : valueSetInfos) {
+      for (Code codes : leftOperand.getCodes()) {
+        if (provider.in(codes, vsi)) { return true; }
+      }
+      // return false;
+    }
+    return false;
   }
 
   @Override
   public Object evaluate(Context context) {
-    Object code = getCode().evaluate(context);
-    Object valueset = getValueset();
+    Object left = getCode().evaluate(context);
+    Object right = getValueset();
+    this.context = context;
 
-    return inValueSet(context, code, valueset);
-  }
+    if (left == null) { return null; }
 
-  public ValueSetDef resolveVSR(Context context, ValueSetRef valueset) {
-    return context.resolveValueSetRef(valueset.getLibraryName(), valueset.getName());
-  }
-
-  public CodeSystemDef resolveCSR(Context context, CodeSystemRef codesystem) {
-    return context.resolveCodeSystemRef(codesystem.getLibraryName(), codesystem.getName());
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

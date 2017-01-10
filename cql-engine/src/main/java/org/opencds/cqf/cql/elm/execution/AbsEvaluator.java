@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Quantity;
+
 import java.math.BigDecimal;
 
 /*
@@ -16,9 +17,24 @@ If the argument is null, the result is null.
 
 /**
  * Created by Bryn on 5/24/2016.
- * Edited by Chris Schuler on 6/14/2016
  */
 public class AbsEvaluator extends org.cqframework.cql.elm.execution.Abs {
+
+    @Override
+    public Object doOperation(Integer operand) {
+        return Math.abs(operand);
+    }
+
+    @Override
+    public Object doOperation(BigDecimal operand) {
+        return operand.abs();
+    }
+
+    @Override
+    public Object doOperation(Quantity operand) {
+        return operand.getValue().abs();
+    }
+
     @Override
     public Object evaluate(Context context) {
         Object value = getOperand().evaluate(context);
@@ -27,18 +43,6 @@ public class AbsEvaluator extends org.cqframework.cql.elm.execution.Abs {
             return null;
         }
 
-        if (value instanceof Integer) {
-            return Math.abs((Integer)value);
-        }
-
-        else if (value instanceof BigDecimal) {
-            return ((BigDecimal)value).abs();
-        }
-
-        else if (value instanceof Quantity) {
-          return (((Quantity)value).getValue()).abs();
-        }
-
-        throw new IllegalArgumentException(String.format("Cannot %s with argument of type '%s'.",this.getClass().getSimpleName(), value.getClass().getName()));
+        return Execution.resolveArithmeticDoOperation(this, value);
     }
 }

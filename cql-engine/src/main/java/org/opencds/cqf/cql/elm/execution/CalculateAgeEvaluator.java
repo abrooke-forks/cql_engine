@@ -25,12 +25,16 @@ The CalculateAge operators are defined in terms of a DateTime duration calculati
 public class CalculateAgeEvaluator extends org.cqframework.cql.elm.execution.CalculateAge {
 
   @Override
+  public Object doOperation(DateTime operand) {
+    return new DurationBetweenEvaluator().withPrecision(getPrecision().value()).doOperation(operand, DateTime.getToday());
+  }
+
+  @Override
   public Object evaluate(Context context) {
     Object operand = getOperand().evaluate(context);
-    String precision = getPrecision().value();
 
     if (operand == null) { return null; }
 
-    return CalculateAgeAtEvaluator.calculateAgeAt(operand, DateTime.getToday(), precision);
+    return Execution.resolveClinicalDoOperation(this, operand);
   }
 }

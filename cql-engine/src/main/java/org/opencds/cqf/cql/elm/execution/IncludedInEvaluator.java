@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -29,30 +28,29 @@ Note that the order of elements does not matter for the purposes of determining 
  */
 public class IncludedInEvaluator extends org.cqframework.cql.elm.execution.IncludedIn {
 
-  public static Object includedIn(Object left, Object right) {
-    if (left != null || right != null) {
-      if (left instanceof Interval) {
-        Object leftStart = ((Interval)left).getStart();
-        Object leftEnd = ((Interval)left).getEnd();
-        Object rightStart = ((Interval)right).getStart();
-        Object rightEnd = ((Interval)right).getEnd();
+  @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    Object leftStart = leftOperand.getStart();
+    Object leftEnd = leftOperand.getEnd();
+    Object rightStart = rightOperand.getStart();
+    Object rightEnd = rightOperand.getEnd();
 
-        if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
-
-        return (Value.compareTo(rightStart, leftStart, "<=") && Value.compareTo(rightEnd, leftEnd, ">="));
-      }
-
-      else if (left instanceof Iterable) {
-        for (Object element : (Iterable)left) {
-            if (!InEvaluator.in(element, (Iterable)right)) {
-                return false;
-            }
-        }
-        return true;
-      }
-      throw new IllegalArgumentException(String.format("Cannot IncludedIn arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+    if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) {
+      return null;
     }
-   return null;
+
+    return ((Boolean) Execution.resolveComparisonDoOperation(new LessOrEqualEvaluator(), rightStart, leftStart)
+                && (Boolean) Execution.resolveComparisonDoOperation(new GreaterOrEqualEvaluator(), rightEnd, leftEnd));
+  }
+
+  @Override
+  public Object doOperation(Iterable<Object> leftOperand, Iterable<Object> rightOperand) {
+    for (Object element : leftOperand) {
+      if (!(Boolean) Execution.resolveSharedDoOperation(new InEvaluator(), element, rightOperand))
+        return false;
+    }
+
+    return true;
   }
 
   @Override
@@ -60,6 +58,8 @@ public class IncludedInEvaluator extends org.cqframework.cql.elm.execution.Inclu
     Object left = getOperand().get(0).evaluate(context);
     Object right = getOperand().get(1).evaluate(context);
 
-    return includedIn(left, right);
+    if (left == null || right == null) { return null; }
+
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

@@ -1,16 +1,11 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Value;
-import org.opencds.cqf.cql.runtime.Quantity;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.DateTime;
-import org.opencds.cqf.cql.runtime.Time;
-import java.math.BigDecimal;
+
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.List;
 
 /*
 collapse(argument List<Interval<T>>) List<Interval<T>>
@@ -27,48 +22,36 @@ If the argument is null, the result is null.
 */
 public class CollapseEvaluator extends org.cqframework.cql.elm.execution.Collapse {
 
-  public static Object collapse(ArrayList<Interval> intervals) {
-    Collections.sort(intervals, new Comparator<Interval>() {
-      @Override
-      public int compare(Interval o1, Interval o2) {
-        if (o1.getStart() instanceof Integer || o1.getStart() instanceof DateTime || o1.getStart() instanceof Time) {
-          if (Value.compareTo(o1.getStart(), o2.getStart(), "<")) { return -1; }
-          else if (Value.compareTo(o1.getStart(), o2.getStart(), "==")) { return 0; }
-          else if (Value.compareTo(o1.getStart(), o2.getStart(), ">")) { return 1; }
-        }
-        else if (o1.getStart() instanceof BigDecimal) {
-          return ((BigDecimal)o1.getStart()).compareTo((BigDecimal)o2.getStart());
-        }
-        else if (o1.getStart() instanceof Quantity) {
-          return (((Quantity)o1.getStart()).getValue().compareTo(((Quantity)o2.getStart()).getValue()));
-        }
-        throw new IllegalArgumentException(String.format("Cannot Collapse arguments of type '%s' and '%s'.", o1.getClass().getName(), o1.getClass().getName()));
-      }
-    });
+  @Override
+  public Object doOperation(Iterable<Object> operand) {
+    List<Interval> list = new ArrayList<>();
+    operand.forEach(ae -> list.add((Interval) ae));
 
-    for (int i = 0; i < intervals.size(); ++i) {
-      if ((i+1) < intervals.size()) {
-        if (OverlapsEvaluator.overlaps((Interval)intervals.get(i), (Interval)intervals.get(i+1))) {
-          intervals.set(i, new Interval(((Interval)intervals.get(i)).getStart(), true, ((Interval)intervals.get(i+1)).getEnd(), true));
-          intervals.remove(i+1);
+    if (list.size() == 1 && list.get(0) != null) { return list; }
+    else if (list.size() == 1) { return null; }
+    else if (list.size() == 0) { return null; }
+
+    Collections.sort(list, Interval.sortInterval);
+
+    for (int i = 0; i < list.size(); ++i) {
+      if (list.get(i).getStart() == null || list.get(i).getEnd() == null) { continue; }
+      if ((i+1) < list.size()) {
+        if ((Boolean) new OverlapsEvaluator().doOperation(list.get(i), list.get(i+1))) {
+          list.set(i, new Interval((list.get(i)).getStart(), true, (list.get(i+1)).getEnd(), true));
+          list.remove(i+1);
           i -= 1;
         }
       }
     }
-    return intervals;
+    return list.isEmpty() ? null : list;
   }
 
   @Override
   public Object evaluate(Context context) {
-    Iterable<Object> list = (Iterable<Object>)getOperand().evaluate(context);
-    if (list == null) { return null; }
-    ArrayList intervals = new ArrayList();
-    for (Object interval : list) {
-      if (interval != null) { intervals.add(interval); }
-    }
-    if (intervals.size() == 1) { return intervals; }
-    else if (intervals.size() == 0) { return null; }
+    Object operand = getOperand().evaluate(context);
 
-    return collapse(intervals);
+    if (operand == null) { return null; }
+
+    return Execution.resolveIntervalDoOperation(this, operand);
   }
 }

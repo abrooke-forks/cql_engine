@@ -6,8 +6,7 @@ import org.opencds.cqf.cql.runtime.DateTime;
 /*
 date from(argument DateTime) DateTime
 
-NOTE: this is within the purview of DateTimeComponentFrom
-  Description available in that class
+NOTE: Description available in DateTimeComponentFrom
 */
 
 /**
@@ -16,12 +15,16 @@ NOTE: this is within the purview of DateTimeComponentFrom
 public class DateFromEvaluator extends org.cqframework.cql.elm.execution.DateFrom {
 
   @Override
+  public Object doOperation(DateTime operand) {
+    return operand;
+  }
+
+  @Override
   public Object evaluate(Context context) {
     Object operand = getOperand().evaluate(context);
 
-    if (operand instanceof DateTime) {
-      return (DateTime)operand;
-    }
-    throw new IllegalArgumentException(String.format("Cannot DateFrom arguments of type '%s'.", operand.getClass().getName()));
+    if (operand == null) { return null; }
+
+    return Execution.resolveDateTimeDoOperation(this, operand);
   }
 }

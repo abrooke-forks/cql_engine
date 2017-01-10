@@ -1,9 +1,9 @@
 package org.opencds.cqf.cql.elm.execution;
 
+import org.joda.time.Partial;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Time;
-import org.joda.time.DateTime;
-import org.joda.time.Partial;
+
 import java.math.BigDecimal;
 
 /*
@@ -27,23 +27,52 @@ If the argument is null, the result is null.
 */
 public class ToTimeEvaluator extends org.cqframework.cql.elm.execution.ToTime {
 
-  public static BigDecimal getTimezone(String isoTimeString) {
-    BigDecimal tz = new BigDecimal(new DateTime(isoTimeString).getZone().getOffset(0) / 3600000.0);
-    if (isoTimeString.indexOf('+') != -1) {
-      String[] temp = isoTimeString.split("\\+");
-      String[] temp2 = temp[1].split(":");
-      Double hour = Double.parseDouble(temp2[0]);
-      Double minute = Integer.parseInt(temp2[1]) / 60.0;
-      tz = new BigDecimal(hour + minute);
+  public Partial timeToPartial(String isoDateString) {
+    String[] timeAndTimezone = isoDateString.replace('T', ' ').replace('Z', ' ').trim().split("[\\+\\-]");
+    String[] time = timeAndTimezone[0].split("\\W");
+    int[] values = new int[time.length];
+    for (int i = 0; i < values.length; ++i) {
+      values[i] = Integer.parseInt(time[i]);
     }
-    else if (isoTimeString.indexOf('-') != -1) {
-      String[] temp = isoTimeString.split("-");
-      String[] temp2 = temp[1].split(":");
-      Double hour = Double.parseDouble(temp2[0]);
-      Double minute = Integer.parseInt(temp2[1]) / 60.0;
-      tz = new BigDecimal(hour + minute).negate();
+    return new Partial(Time.getFields(values.length), values);
+  }
+
+  public String timeToOffset(String time) {
+    switch (time) {
+      case "15": return "25";
+      case "30": return "50";
+      case "45": return "75";
+      default: return time;
     }
-    return tz;
+  }
+
+  public BigDecimal utcOffsetToDecimal(String offset, boolean sign) {
+    String[] utc = offset.split(":");
+    if (utc.length > 1) {
+      return sign ? new BigDecimal(utc[0] + "." + timeToOffset(utc[1])).negate()
+              : new BigDecimal(utc[0] + "." + timeToOffset(utc[1]));
+    }
+    return sign ? new BigDecimal(offset + ".0").negate() : new BigDecimal(offset + ".0");
+  }
+
+  public boolean hasOffset(String isoDateString) {
+    return isoDateString.contains("Z") || isoDateString.contains("+") || isoDateString.contains("-");
+  }
+
+  public BigDecimal getOffset(String isoDateString) {
+    if (hasOffset(isoDateString)) {
+      String[] offset = isoDateString.split("[\\+\\-Z]");
+      boolean sign = isoDateString.contains("-");
+      if (offset.length > 1) { return utcOffsetToDecimal(offset[1], sign); }
+    }
+
+    return new BigDecimal("0");
+  }
+
+  @Override
+  public Object doOperation(String operand) {
+    BigDecimal offset = getOffset(operand);
+    return new Time().withPartial(timeToPartial(operand)).withTimezoneOffset(offset);
   }
 
   @Override
@@ -52,13 +81,6 @@ public class ToTimeEvaluator extends org.cqframework.cql.elm.execution.ToTime {
 
     if (operand == null) { return null; }
 
-    String[] timeAndTimezone = operand.toString().replace('T', ' ').replace('Z', ' ').trim().split("[\\+-]");
-    String[] time = timeAndTimezone[0].split("\\W");
-    int[] values = new int[time.length];
-    for (int i = 0; i < values.length; ++i) {
-      values[i] = Integer.parseInt(time[i]);
-    }
-
-    return new Time().withPartial(new Partial(Time.getFields(values.length), values)).withTimezoneOffset(getTimezone(operand.toString()));
+    return Execution.resolveTypeDoOperation(this, operand);
   }
 }

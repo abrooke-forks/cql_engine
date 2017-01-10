@@ -2,9 +2,9 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -31,24 +31,34 @@ Note that the union operator can also be invoked with the symbolic operator (|).
  */
 public class UnionEvaluator extends org.cqframework.cql.elm.execution.Union {
 
-  public static Interval union(Object left, Object right) {
-    if (left == null || right == null) { return null; }
-
-    Object leftStart = ((Interval)left).getStart();
-    Object leftEnd = ((Interval)left).getEnd();
-    Object rightStart = ((Interval)right).getStart();
-    Object rightEnd = ((Interval)right).getEnd();
+  @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    Object leftStart = leftOperand.getStart();
+    Object leftEnd = leftOperand.getEnd();
+    Object rightStart = rightOperand.getStart();
+    Object rightEnd = rightOperand.getEnd();
 
     if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
 
-    if (!OverlapsEvaluator.overlaps((Interval)left, (Interval)right) && !MeetsEvaluator.meets((Interval)left, (Interval)right)) {
+    if (!(Boolean) Execution.resolveIntervalDoOperation(new OverlapsEvaluator(), leftOperand, rightOperand)
+            && !(Boolean) Execution.resolveIntervalDoOperation(new MeetsEvaluator(), leftOperand, rightOperand)) {
       return null;
     }
 
-    Object min = Value.compareTo(leftStart, rightStart, "<") ? leftStart : rightStart;
-    Object max = Value.compareTo(leftEnd, rightEnd, ">") ? leftEnd : rightEnd;
+    Object min = (Boolean) Execution.resolveComparisonDoOperation(new LessEvaluator(), leftStart, rightStart)
+                    ? leftStart : rightStart;
+    Object max = (Boolean) Execution.resolveComparisonDoOperation(new GreaterEvaluator(), leftEnd, rightEnd)
+                    ? leftEnd : rightEnd;
 
     return new Interval(min, true, max, true);
+  }
+
+  @Override
+  public Object doOperation(Iterable<Object> leftOperand, Iterable<Object> rightOperand) {
+    List<Object> union = new ArrayList<>();
+    leftOperand.forEach(union::add);
+    rightOperand.forEach(union::add);
+    return union;
   }
 
   @Override
@@ -56,26 +66,8 @@ public class UnionEvaluator extends org.cqframework.cql.elm.execution.Union {
     Object left = getOperand().get(0).evaluate(context);
     Object right = getOperand().get(1).evaluate(context);
 
-    if (left == null || right == null) {
-        return null;
-    }
+    if (left == null || right == null) { return null; }
 
-    if (left instanceof Interval) {
-      return union(left, right);
-    }
-
-    else if (left instanceof Iterable) {
-      // List Logic
-      ArrayList result = new ArrayList();
-      for (Object leftElement : (Iterable)left) {
-          result.add(leftElement);
-      }
-
-      for (Object rightElement : (Iterable)right) {
-          result.add(rightElement);
-      }
-      return result;
-    }
-    throw new IllegalArgumentException(String.format("Cannot Union arguments of type: %s and %s", left.getClass().getName(), right.getClass().getName()));
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

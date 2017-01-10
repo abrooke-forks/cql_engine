@@ -18,29 +18,30 @@ If the argument is null, the result is null.
 public class ExpEvaluator extends org.cqframework.cql.elm.execution.Exp {
 
     @Override
-    public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
+    public Object doOperation(BigDecimal operand) {
+        BigDecimal retVal;
+        try {
+            retVal = new BigDecimal(Math.exp(operand.doubleValue()));
+        } catch (NumberFormatException nfe) {
+            if (operand.compareTo(new BigDecimal(0)) > 0) {
+                throw new ArithmeticException("Results in positive infinity");
+            }
+            else if (operand.compareTo(new BigDecimal(0)) < 0) {
+                throw new ArithmeticException("Results in negative infinity");
+            }
+            else { throw new NumberFormatException(); }
+        }
+        return retVal;
+    }
 
-        if (value == null) {
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = getOperand().evaluate(context);
+
+        if (operand == null) {
             return null;
         }
 
-        if (value instanceof BigDecimal){
-          BigDecimal retVal = new BigDecimal(0);
-          try {
-            retVal = new BigDecimal(Math.exp(((BigDecimal)value).doubleValue()));
-          } catch (NumberFormatException nfe) {
-            if (((BigDecimal)value).compareTo(new BigDecimal(0)) > 0) {
-              throw new ArithmeticException("Results in positive infinity");
-            }
-            else if (((BigDecimal)value).compareTo(new BigDecimal(0)) < 0) {
-              throw new ArithmeticException("Results in negative infinity");
-            }
-            else { throw new NumberFormatException(); }
-          }
-          return retVal;
-        }
-
-        throw new IllegalArgumentException(String.format("Cannot %s with argument of type '%s'.",this.getClass().getSimpleName(), value.getClass().getName()));
+        return Execution.resolveArithmeticDoOperation(this, operand);
     }
 }

@@ -24,7 +24,7 @@ For any other type, attempting to invoke maximum results in an error.
 public class MaxValueEvaluator extends org.cqframework.cql.elm.execution.MaxValue {
 
     @Override
-    public Object evaluate(Context context) {
+    public Object doOperation() {
         switch (valueType.getLocalPart()) {
             case "Integer": return org.opencds.cqf.cql.runtime.Interval.maxValue(Integer.class);
             case "Decimal": return org.opencds.cqf.cql.runtime.Interval.maxValue(BigDecimal.class);
@@ -33,5 +33,10 @@ public class MaxValueEvaluator extends org.cqframework.cql.elm.execution.MaxValu
             case "Time": return org.opencds.cqf.cql.runtime.Interval.maxValue(Time.class);
             default: throw new NotImplementedException(String.format("maxValue not implemented for type %s", valueType.getLocalPart()));
         }
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        return Execution.resolveArithmeticDoOperation(this);
     }
 }

@@ -26,39 +26,55 @@ If the code argument is null, the result is null.
 */
 public class InCodeSystemEvaluator extends org.cqframework.cql.elm.execution.InCodeSystem {
 
-  public Object inCodeSystem(Context context, Object code, Object codeSystem) {
-    if (code == null) { return null; }
+  private Context context;
 
-    CodeSystemDef csd = resolveCSR(context, (CodeSystemRef)codeSystem);
+  public void setContext(Context context) {
+    this.context = context;
+  }
+
+  public InCodeSystemEvaluator withContext(Context context) {
+    setContext(context);
+    return this;
+  }
+
+  private CodeSystemDef resolveCSR(Context context, CodeSystemRef codesystem) {
+    return context.resolveCodeSystemRef(codesystem.getLibraryName(), codesystem.getName());
+  }
+
+  @Override
+  public Object doOperation(String leftOperand, CodeSystemRef rightOperand) {
+    CodeSystemDef csd = resolveCSR(context, rightOperand);
+    CodeSystemInfo csi = new CodeSystemInfo().withId(csd.getId()).withVersion(csd.getVersion());
+    return context.resolveTerminologyProvider().lookup(new Code().withCode(leftOperand), csi) != null;
+  }
+
+  @Override
+  public Object doOperation(Code leftOperand, CodeSystemRef rightOperand) {
+    CodeSystemDef csd = resolveCSR(context, rightOperand);
+    CodeSystemInfo csi = new CodeSystemInfo().withId(csd.getId()).withVersion(csd.getVersion());
+    return context.resolveTerminologyProvider().lookup(leftOperand, csi) != null;
+  }
+
+  @Override
+  public Object doOperation(Concept leftOperand, CodeSystemRef rightOperand) {
+    CodeSystemDef csd = resolveCSR(context, rightOperand);
     CodeSystemInfo csi = new CodeSystemInfo().withId(csd.getId()).withVersion(csd.getVersion());
 
     TerminologyProvider provider = context.resolveTerminologyProvider();
-
-    if (code instanceof String) {
-      return provider.lookup(new Code().withCode((String)code), csi) != null ? true : false;
+    for (Code code : leftOperand.getCodes()) {
+      if (provider.lookup(code, csi) != null) { return true; }
     }
-    else if (code instanceof Code) {
-      return provider.lookup((Code)code, csi) != null ? true : false;
-    }
-    else if (code instanceof Concept) {
-      for (Code codes : ((Concept)code).getCodes()) {
-        if (provider.lookup(codes, csi) != null) { return true; }
-      }
-      return false;
-    }
-
-    throw new IllegalArgumentException(String.format("Cannot InCodeSystem Code arguments of type '%s'.", code.getClass().getName()));
+    return false;
   }
 
   @Override
   public Object evaluate(Context context) {
-    Object code = getCode().evaluate(context);
-    Object codeSystem = getCodesystem();
+    Object left = getCode().evaluate(context);
+    Object right = getCodesystem();
+    this.context = context;
 
-    return inCodeSystem(context, code, codeSystem);
-  }
+    if (left == null) { return null; }
 
-  public CodeSystemDef resolveCSR(Context context, CodeSystemRef codesystem) {
-    return context.resolveCodeSystemRef(codesystem.getLibraryName(), codesystem.getName());
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

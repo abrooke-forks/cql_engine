@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Value;
+import org.opencds.cqf.cql.runtime.Interval;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -23,10 +23,22 @@ The not equal operator is a shorthand for invocation of logical negation (not) o
 public class NotEqualEvaluator extends org.cqframework.cql.elm.execution.NotEqual {
 
     @Override
+    public Object doOperation(Interval leftOperand, Interval rightOperand) {
+        return !(Boolean) new EqualEvaluator().doOperation(leftOperand, rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Iterable<Object> leftOperand, Iterable<Object> rightOperand) {
+        return !(Boolean) new EqualEvaluator().doOperation(leftOperand, rightOperand);
+    }
+
+    @Override
     public Object evaluate(Context context) {
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        return !Value.equals(left, right);
+        if (left == null || right == null) { return null; }
+
+        return Execution.resolveComparisonDoOperation(this, left, right);
     }
 }

@@ -1,6 +1,9 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
+import org.opencds.cqf.cql.runtime.*;
+
+import java.math.BigDecimal;
 
 /*
 as<T>(argument Any) T
@@ -27,6 +30,15 @@ define RuntimeError:
  */
 public class AsEvaluator extends org.cqframework.cql.elm.execution.As {
 
+    private Class type;
+    public void setType(Class type) {
+        this.type = type;
+    }
+    public AsEvaluator withType(Class type) {
+        setType(type);
+        return this;
+    }
+
     private Class resolveType(Context context) {
         if (this.getAsTypeSpecifier() != null) {
             return context.resolveType(this.getAsTypeSpecifier());
@@ -35,22 +47,70 @@ public class AsEvaluator extends org.cqframework.cql.elm.execution.As {
         return context.resolveType(this.getAsType());
     }
 
+    private Object as(Object operand) {
+        if (type.isAssignableFrom(operand.getClass())) {
+            return operand;
+        }
+        else if (this.isStrict()) {
+            throw new IllegalArgumentException(String.format("Cannot cast a value of type %s as %s.", operand.getClass().getName(), type.getName()));
+        }
+        else {
+            return null;
+        }
+    }
+
+    @Override
+    public Object doOperation(Boolean operand) {
+        return as(operand);
+    }
+
+    @Override
+    public Object doOperation(BigDecimal operand) {
+        return as(operand);
+    }
+
+    @Override
+    public Object doOperation(Code operand) {
+        return as(operand);
+    }
+
+    @Override
+    public Object doOperation(Concept operand) {
+        return as(operand);
+    }
+
+    @Override
+    public Object doOperation(DateTime operand) {
+        return as(operand);
+    }
+
+    @Override
+    public Object doOperation(Integer operand) {
+        return as(operand);
+    }
+
+    @Override
+    public Object doOperation(Quantity operand) {
+        return as(operand);
+    }
+
+    @Override
+    public Object doOperation(String operand) {
+        return as(operand);
+    }
+
+    @Override
+    public Object doOperation(Time operand) {
+        return as(operand);
+    }
+
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-        if (operand != null) {
-            Class clazz = resolveType(context);
-            if (clazz.isAssignableFrom(operand.getClass())) {
-                return operand;
-            }
-            else if (this.isStrict()) {
-                throw new IllegalArgumentException(String.format("Cannot cast a value of type %s as %s.", operand.getClass().getName(), clazz.getName()));
-            }
-            else {
-                return null;
-            }
-        }
+        type = resolveType(context);
 
-        return null;
+        if (operand == null) { return null; }
+
+        return Execution.resolveTypeDoOperation(this, operand);
     }
 }

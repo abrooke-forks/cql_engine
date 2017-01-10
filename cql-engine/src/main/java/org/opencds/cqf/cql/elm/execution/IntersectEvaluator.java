@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,49 +30,44 @@ If either argument is null, the result is null.
 public class IntersectEvaluator extends org.cqframework.cql.elm.execution.Intersect {
 
   @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    if (!(Boolean) new OverlapsEvaluator().doOperation(leftOperand, rightOperand)) {
+      return null;
+    }
+
+    Object leftStart = leftOperand.getStart();
+    Object leftEnd = leftOperand.getEnd();
+    Object rightStart = rightOperand.getStart();
+    Object rightEnd = rightOperand.getEnd();
+
+    if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
+
+    Object max = (Boolean) Execution.resolveComparisonDoOperation(
+            new GreaterEvaluator(), leftStart, rightStart) ? leftStart : rightStart;
+    Object min = (Boolean) Execution.resolveComparisonDoOperation(
+            new LessEvaluator(), leftEnd, rightEnd) ? leftEnd : rightEnd;
+
+    return new Interval(max, true, min, true);
+  }
+
+  @Override
+  public Object doOperation(Iterable<Object> leftOperand, Iterable<Object> rightOperand) {
+    List<Object> result = new ArrayList<>();
+    for (Object leftItem : leftOperand) {
+      if ((Boolean) Execution.resolveSharedDoOperation(new InEvaluator(), leftItem, rightOperand)) {
+        result.add(leftItem);
+      }
+    }
+    return result;
+  }
+
+  @Override
   public Object evaluate(Context context) {
     Object left = getOperand().get(0).evaluate(context);
     Object right = getOperand().get(1).evaluate(context);
 
     if (left == null || right == null) { return null; }
 
-    if (left instanceof Interval) {
-      Interval leftInterval = (Interval)left;
-      Interval rightInterval = (Interval)right;
-
-      if (leftInterval == null || rightInterval == null) { return null; }
-
-      if (!OverlapsEvaluator.overlaps(leftInterval, rightInterval)) { return null; }
-
-      Object leftStart = leftInterval.getStart();
-      Object leftEnd = leftInterval.getEnd();
-      Object rightStart = rightInterval.getStart();
-      Object rightEnd = rightInterval.getEnd();
-
-      if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
-
-      Object max = Value.compareTo(leftStart, rightStart, ">") ? leftStart : rightStart;
-      Object min = Value.compareTo(leftEnd, rightEnd, "<") ? leftEnd : rightEnd;
-
-      return new Interval(max, true, min, true);
-    }
-
-    else if (left instanceof Iterable) {
-      Iterable<Object> leftArr = (Iterable<Object>)left;
-      Iterable<Object> rightArr = (Iterable<Object>)right;
-
-      if (leftArr == null || rightArr == null) {
-          return null;
-      }
-
-      List<Object> result = new ArrayList<Object>();
-      for (Object leftItem : leftArr) {
-          if (InEvaluator.in(leftItem, rightArr)) {
-              result.add(leftItem);
-          }
-      }
-      return result;
-    }
-    throw new IllegalArgumentException(String.format("Cannot Intersect arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

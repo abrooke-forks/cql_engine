@@ -16,22 +16,24 @@ If the argument is null, the result is null.
  * Created by Bryn on 5/25/2016.
  */
 public class CeilingEvaluator extends org.cqframework.cql.elm.execution.Ceiling {
+
+  @Override
+  public Object doOperation(BigDecimal operand) {
+    return BigDecimal.valueOf(Math.ceil(operand.doubleValue())).intValue();
+  }
+
+  @Override
+  public Object doOperation(Quantity operand) {
+    return BigDecimal.valueOf(Math.ceil(operand.getValue().doubleValue())).intValue();
+  }
+
   @Override
   public Object evaluate(Context context) {
-    Object value = getOperand().evaluate(context);
 
-    if (value == null) {
-        return null;
-    }
+    Object operand = getOperand().evaluate(context);
 
-    if (value instanceof BigDecimal) {
-      return BigDecimal.valueOf(Math.ceil(((BigDecimal)value).doubleValue())).intValue();
-    }
+    if (operand == null) { return null; }
 
-    else if (value instanceof Quantity) {
-      return BigDecimal.valueOf(Math.ceil(((Quantity)value).getValue().doubleValue())).intValue();
-    }
-
-    throw new IllegalArgumentException(String.format("Cannot perform Ceiling operation with argument of type '%s'.", value.getClass().getName()));
+    return Execution.resolveArithmeticDoOperation(this, operand);
   }
 }

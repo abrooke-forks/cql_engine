@@ -3,7 +3,21 @@ library ComparisonOperator version '1'
 context Population
 
 //Between
-define BetweenIntTrue: 4 between 2 and 6 
+define BetweenIntTrue: 4 between 2 and 6
+define BetweenIntFalse: 4 between 5 and 7
+define BetweenDecimalTrue: 4.0 between 3.0 and 5.0
+define BetweenDecimalTrue2: 4.0 between 4.0 and 4.1
+define BetweenDecimalFalse: 4.0 between 4.1 and 4.2
+define BetweenQuantityTrue: 4.0 'g' between 3.5 'g' and 5.0 'g'
+define BetweenQuantityFalse: 4.0 'g' between 4.5 'g' and 5.0 'g'
+define BetweenDateTimeTrue: DateTime(2010) between DateTime(2009) and DateTime(2011)
+define BetweenDateTimeTrue2: DateTime(2010, 4, 4) between DateTime(2010, 4, 3) and DateTime(2010, 4, 5)
+define BetweenDateTimeFalse: DateTime(2010, 4, 4) between DateTime(2010, 4, 5) and DateTime(2010, 4, 7)
+define BetweenDateTimeNull: DateTime(2010, 4) between DateTime(2010, 4, 5) and DateTime(2010, 4, 7)
+define BetweenTimeTrue: @T10:00:00.000 between @T09:00:00.000 and @T11:00:00.000
+define BetweenTimeFalse: @T10:00:00.000 between @T10:00:01.000 and @T10:00:02.000
+define BetweenStringTrue: 'b' between 'a' and 'c'
+define BetweenStringFalse: 'b' between 'c' and 'd'
 
 //Equal
 define SimpleEqTrueTrue : true = true
@@ -28,7 +42,7 @@ define TupleEqJohnJane: Tuple { Id : 1, Name : 'John' } = Tuple { Id : 2, Name :
 define TupleEqJohn1John2: Tuple { Id : 1, Name : 'John' } = Tuple { Id : 2, Name : 'John' }
 define TupleEqDateTimeTrue: Tuple { dateId: 1, Date: DateTime(2012, 10, 5, 0, 0, 0, 0) } = Tuple { dateId: 1, Date: DateTime(2012, 10, 5, 0, 0, 0, 0) }
 define TupleEqDateTimeFalse: Tuple { dateId: 1, Date: DateTime(2012, 10, 5, 0, 0, 0, 0) } = Tuple { dateId: 1, Date: DateTime(2012, 10, 5, 5, 0, 0, 0) }
-define TupleEqDateTimeNull: Tuple { dateId: 12, Date: DateTime(2012, 1, 1) } = Tuple { dateId: 12, Date: DateTime(2012, 1, 1) }
+define TupleEqDateTimeTrue2: Tuple { dateId: 12, Date: DateTime(2012, 1, 1) } = Tuple { dateId: 12, Date: DateTime(2012, 1, 1) }
 define TupleEqTimeTrue: Tuple { timeId: 55, TheTime: @T05:15:15.541 } = Tuple { timeId: 55, TheTime: @T05:15:15.541 }
 define TupleEqTimeFalse: Tuple { timeId: 55, TheTime: @T05:15:15.541 } = Tuple { timeId: 55, TheTime: @T05:15:15.540 }
 define ListEqEmptyEmpty : {} = {}
@@ -43,9 +57,8 @@ define DateTimeEqTodayToday: Today() = Today()
 define DateTimeEqTodayYesterday: Today() = Today() - 1 days
 define DateTimeEqJanJan: DateTime(2014, 1, 5, 5, 0, 0, 0, 0) = DateTime(2014, 1, 5, 5, 0, 0, 0, 0)
 define DateTimeEqJanJuly: DateTime(2014, 1, 5, 5, 0, 0, 0, 0) = DateTime(2014, 7, 5, 5, 0, 0, 0, 0)
-define DateTimeEqMissingArg: DateTime(2015, 1, 5, 5, 0, 0) = DateTime(2015, 1, 5, 5, 0, 0)
+define DateTimeEqTrue: DateTime(2015, 1, 5, 5, 0, 0) = DateTime(2015, 1, 5, 5, 0, 0)
 define DateTimeEqNull: DateTime(null) = DateTime(null)
-define DateTimeEqNull2: DateTime(2001, 1, 1, null) = DateTime(2001, 1, 1, null, null)
 define DateTimeUTC: @2014-01-25T14:30:14.559+01:00 = @2014-01-25T14:30:14.559+01:00
 define TimeEq10A10A: @T10:00:00.000 = @T10:00:00.000
 define TimeEq10A10P: @T10:00:00.000 = @T22:00:00.000

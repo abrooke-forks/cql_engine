@@ -1,13 +1,20 @@
 package org.opencds.cqf.cql.execution;
 
+import org.opencds.cqf.cql.elm.execution.Execution;
+import org.opencds.cqf.cql.runtime.Quantity;
 import org.testng.annotations.Test;
 import javax.xml.bind.JAXBException;
 import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Time;
 import org.joda.time.Partial;
+import org.w3._1999.xhtml.Big;
+
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.comparesEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -40,6 +47,9 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
 
         result = context.resolveExpressionRef("AllTrueEmptyList").getExpression().evaluate(context);
         assertThat(result, is(nullValue()));
+
+        result = context.resolveExpressionRef("AllTrueAllNull").getExpression().evaluate(context);
+        assertThat(result, is(true));
     }
 
     /**
@@ -74,6 +84,9 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
 
         result = context.resolveExpressionRef("AnyTrueEmptyList").getExpression().evaluate(context);
         assertThat(result, is(nullValue()));
+
+        result = context.resolveExpressionRef("AnyTrueAllNull").getExpression().evaluate(context);
+        assertThat(result, is(false));
     }
 
     /**
@@ -82,8 +95,25 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
     @Test
     public void testAvg() throws JAXBException {
         Context context = new Context(library);
-        Object result = context.resolveExpressionRef("AvgTest1").getExpression().evaluate(context);
-        assertThat(result, is(new BigDecimal("3.0")));
+        Object result = context.resolveExpressionRef("AvgTestDecimal").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("3.0")));
+
+        result = context.resolveExpressionRef("AvgTestQuantity").getExpression().evaluate(context);
+        assertThat(((Quantity) result).getValue(), comparesEqualTo(new BigDecimal("82.95")));
+        assertThat(((Quantity) result).getUnit(), comparesEqualTo("g"));
+
+        result = context.resolveExpressionRef("AvgTestNull").getExpression().evaluate(context);
+        assertThat(result, is(nullValue()));
+
+        result = context.resolveExpressionRef("AvgTestNull2").getExpression().evaluate(context);
+        assertThat(result, is(nullValue()));
+
+        result = context.resolveExpressionRef("AvgTestDecimalWithNull").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("3.0")));
+
+        result = context.resolveExpressionRef("AvgTestQuantityWithNull").getExpression().evaluate(context);
+        assertThat(((Quantity) result).getValue(), comparesEqualTo(new BigDecimal("82.95")));
+        assertThat(((Quantity) result).getUnit(), comparesEqualTo("g"));
     }
 
     /**
@@ -93,13 +123,22 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
     public void testCount() throws JAXBException {
         Context context = new Context(library);
         Object result = context.resolveExpressionRef("CountTest1").getExpression().evaluate(context);
-        assertThat(result, is(4));
+        assertThat((Integer) result, comparesEqualTo(4));
 
         result = context.resolveExpressionRef("CountTestDateTime").getExpression().evaluate(context);
-        assertThat(result, is(3));
+        assertThat((Integer) result, comparesEqualTo(3));
 
         result = context.resolveExpressionRef("CountTestTime").getExpression().evaluate(context);
-        assertThat(result, is(3));
+        assertThat((Integer) result, comparesEqualTo(3));
+
+        result = context.resolveExpressionRef("CountTestBoolean").getExpression().evaluate(context);
+        assertThat((Integer) result, comparesEqualTo(4));
+
+        result = context.resolveExpressionRef("CountTestList").getExpression().evaluate(context);
+        assertThat((Integer) result, comparesEqualTo(3));
+
+        result = context.resolveExpressionRef("CountTestAllNull").getExpression().evaluate(context);
+        assertThat((Integer) result, comparesEqualTo(0));
     }
 
     /**
@@ -109,16 +148,19 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
     public void testMax() throws JAXBException {
         Context context = new Context(library);
         Object result = context.resolveExpressionRef("MaxTestInteger").getExpression().evaluate(context);
-        assertThat(result, is(90));
+        assertThat((Integer) result, comparesEqualTo(90));
+
+        result = context.resolveExpressionRef("MaxTestDecimal").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("90.9")));
 
         result = context.resolveExpressionRef("MaxTestString").getExpression().evaluate(context);
-        assertThat(result, is("zebra"));
+        assertThat((String) result, comparesEqualTo("zebra"));
 
         result = context.resolveExpressionRef("MaxTestDateTime").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 10, 6})));
+        assertThat(((DateTime)result).getPartial(), comparesEqualTo(new Partial(DateTime.getFields(3), new int[] {2012, 10, 6})));
 
         result = context.resolveExpressionRef("MaxTestTime").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {20, 59, 59, 999})));
+        assertThat(((Time)result).getPartial(), comparesEqualTo(new Partial(Time.getFields(4), new int[] {20, 59, 59, 999})));
     }
 
     /**
@@ -126,9 +168,23 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
      */
     @Test
     public void testMedian() throws JAXBException {
-      Context context = new Context(library);
-      Object result = context.resolveExpressionRef("MedianTestDecimal").getExpression().evaluate(context);
-      assertThat(result, is(new BigDecimal("3.50000000")));
+        Context context = new Context(library);
+        Object result = context.resolveExpressionRef("MedianTestDecimalEven").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("3.5")));
+
+        result = context.resolveExpressionRef("MedianTestQuantityEven").getExpression().evaluate(context);
+        assertThat(((Quantity) result).getValue(), comparesEqualTo(new BigDecimal("3.5")));
+        assertThat(((Quantity) result).getUnit(), comparesEqualTo("cm"));
+
+        result = context.resolveExpressionRef("MedianTestDecimalOdd").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("3.0")));
+
+        result = context.resolveExpressionRef("MedianTestQuantityOdd").getExpression().evaluate(context);
+        assertThat(((Quantity) result).getValue(), comparesEqualTo(new BigDecimal("3.0")));
+        assertThat(((Quantity) result).getUnit(), comparesEqualTo("cm"));
+
+        result = context.resolveExpressionRef("MedianTestNull").getExpression().evaluate(context);
+        assertThat(result, is(nullValue()));
     }
 
     /**
@@ -136,18 +192,21 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
      */
     @Test
     public void testMin() throws JAXBException {
-      Context context = new Context(library);
-      Object result = context.resolveExpressionRef("MinTestInteger").getExpression().evaluate(context);
-      assertThat(result, is(0));
+        Context context = new Context(library);
+        Object result = context.resolveExpressionRef("MinTestInteger").getExpression().evaluate(context);
+        assertThat((Integer) result, comparesEqualTo(0));
 
-      result = context.resolveExpressionRef("MinTestString").getExpression().evaluate(context);
-      assertThat(result, is("bye"));
+        result = context.resolveExpressionRef("MinTestDecimal").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("0.0")));
 
-      result = context.resolveExpressionRef("MinTestDateTime").getExpression().evaluate(context);
-      assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 9, 5})));
+        result = context.resolveExpressionRef("MinTestString").getExpression().evaluate(context);
+        assertThat((String) result, comparesEqualTo("bye"));
 
-      result = context.resolveExpressionRef("MinTestTime").getExpression().evaluate(context);
-      assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 59, 59, 999})));
+        result = context.resolveExpressionRef("MinTestDateTime").getExpression().evaluate(context);
+        assertThat(((DateTime)result).getPartial(), comparesEqualTo(new Partial(DateTime.getFields(3), new int[] {2012, 9, 5})));
+
+        result = context.resolveExpressionRef("MinTestTime").getExpression().evaluate(context);
+        assertThat(((Time)result).getPartial(), comparesEqualTo(new Partial(Time.getFields(4), new int[] {5, 59, 59, 999})));
     }
 
     /**
@@ -155,12 +214,22 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
      */
     @Test
     public void testMode() throws JAXBException {
-      Context context = new Context(library);
-      Object result = context.resolveExpressionRef("ModeTestDateTime").getExpression().evaluate(context);
-      assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 9, 5})));
+        Context context = new Context(library);
+        Object result = context.resolveExpressionRef("ModeTestInteger").getExpression().evaluate(context);
+        assertThat((Integer) result, comparesEqualTo(9));
 
-      result = context.resolveExpressionRef("ModeTestTime").getExpression().evaluate(context);
-      assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 59, 59, 999})));
+        result = context.resolveExpressionRef("ModeTestDecimal").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("12.2")));
+
+        result = context.resolveExpressionRef("ModeTestNull").getExpression().evaluate(context);
+        assertThat(result, is(nullValue()));
+
+        result = context.resolveExpressionRef("ModeTestDateTime").getExpression().evaluate(context);
+        assertThat(((DateTime)result).getPartial(), comparesEqualTo(new Partial(DateTime.getFields(3), new int[] {2012, 9, 5})));
+
+        result = context.resolveExpressionRef("ModeTestTime").getExpression().evaluate(context);
+        assertThat(((Time)result).getPartial(), comparesEqualTo(new Partial(Time.getFields(4), new int[] {5, 59, 59, 999})));
+
     }
 
     /**
@@ -168,9 +237,13 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
      */
     @Test
     public void testPopulationStdDev() throws JAXBException {
-      Context context = new Context(library);
-      Object result = context.resolveExpressionRef("PopStdDevTest1").getExpression().evaluate(context);
-      assertThat(result, is(new BigDecimal("1.41421356"))); //23730951454746218587388284504413604736328125
+        Context context = new Context(library);
+        Object result = context.resolveExpressionRef("PopStdDevTestDecimal").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("1.41421356")));
+
+        result = context.resolveExpressionRef("PopStdDevTestQuantity").getExpression().evaluate(context);
+        assertThat(((Quantity) result).getValue(), comparesEqualTo(new BigDecimal("1.41421356")));
+        assertThat(((Quantity) result).getUnit(), comparesEqualTo("g"));
     }
 
     /**
@@ -179,8 +252,12 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
     @Test
     public void testPopulationVariance() throws JAXBException {
       Context context = new Context(library);
-      Object result = context.resolveExpressionRef("PopVarianceTest1").getExpression().evaluate(context);
-      assertThat(result, is(new BigDecimal("2")));
+      Object result = context.resolveExpressionRef("PopVarianceTestDecimal").getExpression().evaluate(context);
+      assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("2.0")));
+
+        result = context.resolveExpressionRef("PopVarianceTestQuantity").getExpression().evaluate(context);
+        assertThat(((Quantity) result).getValue(), comparesEqualTo(new BigDecimal("2.0")));
+        assertThat(((Quantity) result).getUnit(), comparesEqualTo("g"));
     }
 
     /**
@@ -188,9 +265,13 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
      */
     @Test
     public void testStdDev() throws JAXBException {
-      Context context = new Context(library);
-      Object result = context.resolveExpressionRef("StdDevTest1").getExpression().evaluate(context);
-      assertThat(result, is(new BigDecimal("1.58113883"))); //00841897613935316257993690669536590576171875
+        Context context = new Context(library);
+        Object result = context.resolveExpressionRef("StdDevTestDecimal").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("1.58113883")));
+
+        result = context.resolveExpressionRef("StdDevTestQuantity").getExpression().evaluate(context);
+        assertThat(((Quantity) result).getValue(), comparesEqualTo(new BigDecimal("1.58113883")));
+        assertThat(((Quantity) result).getUnit(), comparesEqualTo("mm"));
     }
 
     /**
@@ -198,12 +279,15 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
      */
     @Test
     public void testSum() throws JAXBException {
-      Context context = new Context(library);
-      Object result = context.resolveExpressionRef("SumTest1").getExpression().evaluate(context);
-      assertThat(result, is(new BigDecimal("20.0")));
+        Context context = new Context(library);
+        Object result = context.resolveExpressionRef("SumTest1").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("20.0")));
 
-      result = context.resolveExpressionRef("SumTestNull").getExpression().evaluate(context);
-      assertThat(result, is(1));
+        result = context.resolveExpressionRef("SumTestNull").getExpression().evaluate(context);
+        assertThat((Integer) result, comparesEqualTo(1));
+
+        result = context.resolveExpressionRef("SumTestAllNull").getExpression().evaluate(context);
+        assertThat(result, is(nullValue()));
     }
 
     /**
@@ -211,8 +295,12 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
      */
     @Test
     public void testVariance() throws JAXBException {
-      Context context = new Context(library);
-      Object result = context.resolveExpressionRef("VarianceTest1").getExpression().evaluate(context);
-      assertThat(result, is(new BigDecimal("2.5")));
+        Context context = new Context(library);
+        Object result = context.resolveExpressionRef("VarianceTestDecimal").getExpression().evaluate(context);
+        assertThat((BigDecimal) result, comparesEqualTo(new BigDecimal("2.5")));
+
+        result = context.resolveExpressionRef("VarianceTestQuantity").getExpression().evaluate(context);
+        assertThat(((Quantity) result).getValue(), comparesEqualTo(new BigDecimal("2.5")));
+        assertThat(((Quantity) result).getUnit(), comparesEqualTo("cm"));
     }
 }

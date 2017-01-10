@@ -22,33 +22,30 @@ Possible return types include: Integer, BigDecimal, Quantity, DateTime, Time, St
 */
 public class MaxEvaluator extends org.cqframework.cql.elm.execution.Max {
 
-  public static Object max(Object source) {
-    if (source instanceof Iterable) {
-      Iterable<Object> element = (Iterable<Object>)source;
-      Iterator<Object> itr = element.iterator();
+  @Override
+  public Object doOperation(Iterable<Object> operand) {
+    Iterator<Object> itr = operand.iterator();
 
-      if (!itr.hasNext()) { return null; } // empty list
-      Object max = itr.next();
-      while (max == null && itr.hasNext()) { max = itr.next(); }
-      while (itr.hasNext()) {
-        Object value = itr.next();
+    if (!itr.hasNext()) { return null; } // empty list
 
-        if (value == null) { continue; } // skip null
-
-        if ((Boolean)GreaterEvaluator.greater(value, max)) { max = value; }
+    Object max = itr.next();
+    while (max == null && itr.hasNext()) { max = itr.next(); }
+    while (itr.hasNext()) {
+      Object value = itr.next();
+      if (value == null) { continue; } // skip null
+      if ((Boolean) Execution.resolveComparisonDoOperation(new GreaterEvaluator(), value, max)) {
+        max = value;
       }
-      return max;
     }
-    else { return null; }
+    return max;
   }
 
   @Override
   public Object evaluate(Context context) {
+    Object operand = getSource().evaluate(context);
 
-    Object source = getSource().evaluate(context);
-    if (source == null) { return null; }
+    if ((Boolean) new IsNullEvaluator().doOperation((Iterable<Object>) operand)) { return null; }
 
-
-    return max(source);
+    return Execution.resolveAggregateDoOperation(this, operand);
   }
 }

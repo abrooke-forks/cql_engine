@@ -1,9 +1,8 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Uncertainty;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
+import org.opencds.cqf.cql.runtime.Uncertainty;
 
 import java.math.BigDecimal;
 
@@ -21,29 +20,34 @@ If either argument is null, the result is null.
  */
 public class TruncatedDivideEvaluator extends org.cqframework.cql.elm.execution.TruncatedDivide {
 
-  public static Object div(Object left, Object right) {
-    if (left == null || right == null) {
-        return null;
+  @Override
+  public Object doOperation(Integer leftOperand, Integer rightOperand) {
+    if (rightOperand == 0) { return null; }
+    return leftOperand / rightOperand;
+  }
+
+  @Override
+  public Object doOperation(BigDecimal leftOperand, BigDecimal rightOperand) {
+    if (rightOperand.compareTo(new BigDecimal("0")) == 0) { return null; }
+    return leftOperand.divideAndRemainder(rightOperand)[0];
+  }
+
+  // NOTE: this operation signature is not specified in the spec.
+  // It is being used for uncertainty arithmetic
+  @Override
+  public Object doOperation(Uncertainty leftOperand, Uncertainty rightOperand) {
+    Interval leftInterval = leftOperand.getUncertaintyInterval();
+    Interval rightInterval = rightOperand.getUncertaintyInterval();
+
+    if ((Boolean) Execution.resolveComparisonDoOperation(new EqualEvaluator(), rightInterval.getStart(), 0)
+            || (Boolean) Execution.resolveComparisonDoOperation(new EqualEvaluator(), rightInterval.getEnd(), 0))
+    {
+      return null;
     }
 
-    if (left instanceof Integer) {
-      if ((Integer)right == 0) { return null; }
-      return (Integer)left / (Integer)right;
-    }
-
-    else if (left instanceof BigDecimal) {
-      if (Value.compareTo(right, new BigDecimal("0.0"), "==")) { return null; }
-      return ((BigDecimal)left).divideAndRemainder((BigDecimal)right)[0];
-    }
-
-    else if (left instanceof Uncertainty && right instanceof Uncertainty) {
-      Interval leftInterval = ((Uncertainty)left).getUncertaintyInterval();
-      Interval rightInterval = ((Uncertainty)right).getUncertaintyInterval();
-      if (Value.compareTo(rightInterval.getStart(), 0, "==") || Value.compareTo(rightInterval.getEnd(), 0, "==")) { return null; }
-      return new Uncertainty().withUncertaintyInterval(new Interval(div(leftInterval.getStart(), rightInterval.getStart()), true, div(leftInterval.getEnd(), rightInterval.getEnd()), true));
-    }
-
-    throw new IllegalArgumentException(String.format("Cannot Div arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+    return new Uncertainty().withUncertaintyInterval(new Interval(
+            Execution.resolveSharedDoOperation(this, leftInterval.getStart(), rightInterval.getStart()), true,
+            Execution.resolveSharedDoOperation(this, leftInterval.getEnd(), rightInterval.getEnd()), true));
   }
 
     @Override
@@ -51,6 +55,8 @@ public class TruncatedDivideEvaluator extends org.cqframework.cql.elm.execution.
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        return div(left, right);
+        if (left == null || right == null) { return null; }
+
+        return Execution.resolveArithmeticDoOperation(this, left, right);
     }
 }

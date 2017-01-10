@@ -20,12 +20,16 @@ If the argument is null, the result is null.
 public class StartEvaluator extends org.cqframework.cql.elm.execution.Start {
 
     @Override
-    public Object evaluate(Context context) {
-        Interval argument = (Interval)this.getOperand().evaluate(context);
-        if (argument != null) {
-            return argument.getStart();
-        }
+    public Object doOperation(Interval operand) {
+        return operand.getStart();
+    }
 
-        return null;
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = this.getOperand().evaluate(context);
+
+        if (operand == null) { return null; }
+
+        return Execution.resolveIntervalDoOperation(this, operand);
     }
 }

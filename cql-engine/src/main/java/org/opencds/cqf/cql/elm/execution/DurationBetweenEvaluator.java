@@ -1,17 +1,15 @@
 package org.opencds.cqf.cql.elm.execution;
 
+import org.joda.time.*;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.DateTime;
-import org.opencds.cqf.cql.runtime.Time;
-
-// for Uncertainty
 import org.opencds.cqf.cql.runtime.Interval;
+import org.opencds.cqf.cql.runtime.Time;
 import org.opencds.cqf.cql.runtime.Uncertainty;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 
-import org.joda.time.*;
+// for Uncertainty
 
 /*
 duration between(low DateTime, high DateTime) Integer
@@ -34,6 +32,16 @@ days between DateTime(2012, 5, 5) and DateTime(2011, 5, 0) = 365 + 5 = 370 days
 * Created by Chris Schuler on 6/22/2016
 */
 public class DurationBetweenEvaluator extends org.cqframework.cql.elm.execution.DurationBetween {
+
+  private String precision;
+  public void setPrecision(String precision) {
+    this.precision = precision;
+  }
+
+  public DurationBetweenEvaluator withPrecision(String precision) {
+    setPrecision(precision);
+    return this;
+  }
 
   public static Integer between(DateTime leftDT, DateTime rightDT, int idx) {
     Integer ret = 0;
@@ -75,90 +83,82 @@ public class DurationBetweenEvaluator extends org.cqframework.cql.elm.execution.
     return ret;
   }
 
-  public static Object durationBetween(Object left, Object right, String precision) {
-    if (left == null || right == null) { return null; }
+  @Override
+  public Object doOperation(DateTime leftOperand, DateTime rightOperand) {
+    int idx = DateTime.getFieldIndex(precision);
 
-    if (left instanceof DateTime && right instanceof DateTime) {
-      DateTime leftDT = (DateTime)left;
-      DateTime rightDT = (DateTime)right;
+    if (idx != -1) {
 
-      int idx = DateTime.getFieldIndex(precision);
-
-      if (idx != -1) {
-
-        // Uncertainty
-        if (Uncertainty.isUncertain(leftDT, precision)) {
-          precision = DateTime.getUnit(rightDT.getPartial().size() - 1);
-          ArrayList<DateTime> highLow = Uncertainty.getHighLowList(leftDT, precision);
-          return new Uncertainty().withUncertaintyInterval(new Interval(between(highLow.get(1), rightDT, idx), true, between(highLow.get(0), rightDT, idx), true));
-        }
-
-        else if (Uncertainty.isUncertain(rightDT, precision)) {
-          precision = DateTime.getUnit(leftDT.getPartial().size() - 1);
-          ArrayList<DateTime> highLow = Uncertainty.getHighLowList(rightDT, precision);
-          return new Uncertainty().withUncertaintyInterval(new Interval(between(leftDT, highLow.get(0), idx), true, between(leftDT, highLow.get(1), idx), true));
-        }
-
-        else if (leftDT.getPartial().size() > rightDT.getPartial().size()) {
-          // each partial must have same number of fields - expand rightDT
-          rightDT = DateTime.expandPartialMin(rightDT, leftDT.getPartial().size());
-        }
-
-        else if (rightDT.getPartial().size() > leftDT.getPartial().size()) {
-          // each partial must have same number of fields - expand leftDT
-          leftDT = DateTime.expandPartialMin(leftDT, rightDT.getPartial().size());
-        }
-
-        return between(leftDT, rightDT, idx);
+      // Uncertainty
+      if (Uncertainty.isUncertain(leftOperand, precision)) {
+        precision = DateTime.getUnit(rightOperand.getPartial().size() - 1);
+        ArrayList<DateTime> highLow = Uncertainty.getHighLowList(leftOperand, precision);
+        return new Uncertainty().withUncertaintyInterval(new Interval(
+                between(highLow.get(1), rightOperand, idx), true,
+                between(highLow.get(0), rightOperand, idx), true));
       }
 
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
+      else if (Uncertainty.isUncertain(rightOperand, precision)) {
+        precision = DateTime.getUnit(leftOperand.getPartial().size() - 1);
+        ArrayList<DateTime> highLow = Uncertainty.getHighLowList(rightOperand, precision);
+        return new Uncertainty().withUncertaintyInterval(new Interval(
+                between(leftOperand, highLow.get(0), idx), true,
+                between(leftOperand, highLow.get(1), idx), true));
       }
+
+      else if (leftOperand.getPartial().size() > rightOperand.getPartial().size()) {
+        // each partial must have same number of fields - expand rightDT
+        rightOperand = DateTime.expandPartialMin(rightOperand, leftOperand.getPartial().size());
+      }
+
+      else if (rightOperand.getPartial().size() > leftOperand.getPartial().size()) {
+        // each partial must have same number of fields - expand leftDT
+        leftOperand = DateTime.expandPartialMin(leftOperand, rightOperand.getPartial().size());
+      }
+
+      return between(leftOperand, rightOperand, idx);
     }
 
-    if (left instanceof Time && right instanceof Time) {
-      Time leftT = (Time)left;
-      Time rightT = (Time)right;
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
+  }
 
-      int idx = Time.getFieldIndex(precision);
+  @Override
+  public Object doOperation(Time leftOperand, Time rightOperand) {
+    int idx = Time.getFieldIndex(precision);
 
-      if (idx != -1) {
+    if (idx != -1) {
 
-        // Uncertainty
-        if (Uncertainty.isUncertain(leftT, precision)) {
-          precision = Time.getUnit(rightT.getPartial().size() - 1);
-          ArrayList<Time> highLow = Uncertainty.getHighLowList(leftT, precision);
-          return new Uncertainty().withUncertaintyInterval(new Interval(between(highLow.get(1), rightT, idx), true, between(highLow.get(0), rightT, idx), true));
-        }
-
-        else if (Uncertainty.isUncertain(rightT, precision)) {
-          precision = Time.getUnit(leftT.getPartial().size() - 1);
-          ArrayList<Time> highLow = Uncertainty.getHighLowList(rightT, precision);
-          return new Uncertainty().withUncertaintyInterval(new Interval(between(leftT, highLow.get(0), idx), true, between(leftT, highLow.get(1), idx), true));
-        }
-
-        return between(leftT, rightT, idx);
+      // Uncertainty
+      if (Uncertainty.isUncertain(leftOperand, precision)) {
+        precision = Time.getUnit(rightOperand.getPartial().size() - 1);
+        ArrayList<Time> highLow = Uncertainty.getHighLowList(leftOperand, precision);
+        return new Uncertainty().withUncertaintyInterval(new Interval(
+                between(highLow.get(1), rightOperand, idx), true,
+                between(highLow.get(0), rightOperand, idx), true));
       }
 
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
+      else if (Uncertainty.isUncertain(rightOperand, precision)) {
+        precision = Time.getUnit(leftOperand.getPartial().size() - 1);
+        ArrayList<Time> highLow = Uncertainty.getHighLowList(rightOperand, precision);
+        return new Uncertainty().withUncertaintyInterval(new Interval(
+                between(leftOperand, highLow.get(0), idx), true,
+                between(leftOperand, highLow.get(1), idx), true));
       }
+
+      return between(leftOperand, rightOperand, idx);
     }
 
-    throw new IllegalArgumentException(String.format("Cannot DurationBetween arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
   }
 
   @Override
   public Object evaluate(Context context) {
     Object left = getOperand().get(0).evaluate(context);
     Object right = getOperand().get(1).evaluate(context);
-    String precision = getPrecision().value();
+    precision = getPrecision().value();
 
-    if (precision == null) {
-      throw new IllegalArgumentException("Precision must be specified.");
-    }
+    if (left == null || right == null) { return null; }
 
-    return durationBetween(left, right, precision);
+    return Execution.resolveDateTimeDoOperation(this, left, right);
   }
 }

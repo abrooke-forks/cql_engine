@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /*
 Log(argument Decimal, base Decimal) Decimal
@@ -16,25 +17,32 @@ If either argument is null, the result is null.
  */
 public class LogEvaluator extends org.cqframework.cql.elm.execution.Log {
 
+    private BigDecimal verifyPrecision(BigDecimal operand) {
+        if (operand.precision() > 8) {
+            return operand.setScale(8, RoundingMode.FLOOR);
+        }
+        return operand;
+    }
+
+    @Override
+    public Object doOperation(BigDecimal leftOperand, BigDecimal rightOperand) {
+        Double base = Math.log(rightOperand.doubleValue());
+        Double value = Math.log(leftOperand.doubleValue());
+
+        if (base == 0d) {
+            return verifyPrecision(new BigDecimal(value));
+        }
+
+        return verifyPrecision(new BigDecimal(value / base));
+    }
+
     @Override
     public Object evaluate(Context context) {
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        if (left == null || right == null) {
-            return null;
-        }
+        if (left == null || right == null) { return null; }
 
-        if (left instanceof BigDecimal) {
-            Double base = Math.log(((BigDecimal)right).doubleValue());
-            Double value = Math.log(((BigDecimal)left).doubleValue());
-
-            if (base == 0) {
-                return new BigDecimal(value);
-            }
-
-            return new BigDecimal(value / base);
-        }
-        throw new IllegalArgumentException(String.format("Cannot Log arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+        return Execution.resolveArithmeticDoOperation(this, left, right);
     }
 }

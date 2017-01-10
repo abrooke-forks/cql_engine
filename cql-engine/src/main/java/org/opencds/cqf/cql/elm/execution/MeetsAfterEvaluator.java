@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
 
 /*
 meets after(left Interval<T>, right Interval<T>) Boolean
@@ -17,18 +16,22 @@ If either argument is null, the result is null.
 public class MeetsAfterEvaluator extends org.cqframework.cql.elm.execution.MeetsAfter {
 
   @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    Object leftStart = leftOperand.getStart();
+    Object rightEnd = rightOperand.getEnd();
+
+    if (leftStart == null || rightEnd == null) { return null; }
+
+    return Execution.resolveComparisonDoOperation(new EqualEvaluator(), leftStart, Interval.successor(rightEnd));
+  }
+
+  @Override
   public Object evaluate(Context context) {
-    Interval left = (Interval)getOperand().get(0).evaluate(context);
-    Interval right = (Interval)getOperand().get(1).evaluate(context);
+    Object left = getOperand().get(0).evaluate(context);
+    Object right = getOperand().get(1).evaluate(context);
 
-    if (left != null && right != null) {
-      Object leftStart = left.getStart();
-      Object rightEnd = right.getEnd();
+    if (left == null || right == null) { return null; }
 
-      if (leftStart == null || rightEnd == null) { return null; }
-
-      return Value.compareTo(leftStart, Interval.successor(rightEnd), "==");
-    }
-    return null;
+    return Execution.resolveIntervalDoOperation(this, left, right);
   }
 }

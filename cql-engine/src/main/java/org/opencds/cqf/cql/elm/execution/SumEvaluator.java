@@ -1,9 +1,6 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Quantity;
-import java.util.Iterator;
-import java.math.BigDecimal;
 
 /*
 Sum(argument List<Integer>) Integer
@@ -21,46 +18,27 @@ Return types: Integer, BigDecimal & Quantity
 */
 public class SumEvaluator extends org.cqframework.cql.elm.execution.Sum {
 
-  public static Object sum(Object source) {
-    if (source instanceof Iterable) {
-      Iterable<Object> element = (Iterable<Object>)source;
-      Iterator<Object> itr = element.iterator();
-
-      if (!itr.hasNext()) { return null; } // empty list
-      Object sum = itr.next();
-      while (sum == null) { sum = itr.next(); }
-
-      if (sum instanceof Integer) {
-        while (itr.hasNext()) {
-          Integer next = (Integer)itr.next();
-          if (next != null) { sum = (Integer)sum + next; }
-        }
-        return (Integer)sum;
+  @Override
+  public Object doOperation(Iterable<Object> operand) {
+    Object sum = null;
+    for (Object element : operand) {
+      if (sum == null) {
+        sum = element;
+        continue;
       }
-      else if (sum instanceof BigDecimal) {
-        while (itr.hasNext()) {
-          BigDecimal next = (BigDecimal)itr.next();
-          if (next != null) { sum = ((BigDecimal)sum).add(next); }
-        }
-        return (BigDecimal)sum;
-      }
-      else if (sum instanceof Quantity) {
-        while (itr.hasNext()) {
-          BigDecimal next = ((Quantity)itr.next()).getValue();
-          if (next != null) { sum = (((Quantity)sum).getValue()).add(next); }
-        }
-        return new Quantity().withValue(((Quantity)sum).getValue()).withUnit(((Quantity)sum).getUnit());
-      }
-      throw new IllegalArgumentException(String.format("Cannot Sum arguments of type '%s'.", sum.getClass().getName()));
+      if (element == null) { continue; }
+      sum = Execution.resolveArithmeticDoOperation(new AddEvaluator(), sum, element);
     }
-    throw new IllegalArgumentException(String.format("Invalid instance '%s' for Sum operation.", source.getClass().getName()));
+
+    return sum;
   }
 
   @Override
   public Object evaluate(Context context) {
-    Object source = getSource().evaluate(context);
-    if (source == null) { return null; }
+    Object operand = getSource().evaluate(context);
 
-    return sum(source);
+    if (operand == null) { return null; }
+
+    return Execution.resolveAggregateDoOperation(this, operand);
   }
 }

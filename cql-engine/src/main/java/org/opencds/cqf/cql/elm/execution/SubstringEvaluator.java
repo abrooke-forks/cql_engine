@@ -18,36 +18,36 @@ If stringToSub or startIndex is null, or startIndex is out of range, the result 
 public class SubstringEvaluator extends org.cqframework.cql.elm.execution.Substring {
 
     @Override
+    public Object doOperation(String leftOperand, Integer rightOperand) {
+        if (rightOperand < 0 || rightOperand >= leftOperand.length()) {
+            return null;
+        }
+
+        return leftOperand.substring(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(String operand1, Integer operand2, Integer operand3) {
+        operand3 = operand2 + operand3;
+
+        if (operand3 > operand1.length()) {
+            operand3 = operand1.length();
+        }
+
+        if (operand3 < operand2) { return null; }
+
+        return operand1.substring(operand2, operand3);
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        Object stringValue = getStringToSub().evaluate(context);
-        Object startIndexValue = getStartIndex().evaluate(context);
-        Object lengthValue = getLength() == null ? null : getLength().evaluate(context);
+        Object operand1 = getStringToSub().evaluate(context);
+        Object operand2 = getStartIndex().evaluate(context);
+        Object operand3 = getLength() == null ? null : getLength().evaluate(context);
 
-        if (stringValue == null || startIndexValue == null) {
-            return null;
-        }
+        if (operand1 == null || operand2 == null) { return null; }
 
-        String string = (String)stringValue;
-        Integer startIndex = (Integer)startIndexValue;
-
-        if (startIndex < 0 || startIndex >= string.length()) {
-            return null;
-        }
-
-        if (lengthValue == null) {
-            return string.substring(startIndex);
-        }
-        else {
-            int endIndex = startIndex + (Integer)lengthValue;
-            if (endIndex > string.length()) {
-                endIndex = string.length();
-            }
-
-            if (endIndex < startIndex) {
-                return null;
-            }
-
-            return string.substring(startIndex, endIndex);
-        }
+        return operand3 == null ? Execution.resolveStringDoOperation(this, operand1, operand2) :
+                Execution.resolveStringDoOperation(this, operand1, operand2, operand3);
     }
 }

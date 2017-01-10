@@ -125,7 +125,6 @@ define PredecessorOf0: predecessor of 0
 define PredecessorOf1: predecessor of 1
 define PredecessorOf1D: predecessor of 1.0
 define PredecessorOf101D: predecessor of 1.01
-define PredecessorOf1QCM: predecessor of 1.0 'cm'
 define PredecessorOfJan12000: predecessor of DateTime(2000,1,1)
 define PredecessorOfNoon: predecessor of @T12:00:00.000
 define PredecessorUnderflowDt: predecessor of DateTime(0001, 1, 1, 0, 0, 0, 0)

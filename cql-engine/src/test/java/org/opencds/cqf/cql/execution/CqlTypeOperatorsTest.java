@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.execution;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.*;
 import org.joda.time.Partial;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import javax.xml.bind.JAXBException;
 import java.math.BigDecimal;
@@ -90,7 +91,6 @@ public class CqlTypeOperatorsTest extends CqlExecutionTestBase {
         Context context = new Context(library);
         Object result = context.resolveExpressionRef("CodeToConcept1").getExpression().evaluate(context);
         assertThat(result, is(new Concept().withCode(new Code().withCode("8480-6").withSystem("http://loinc.org").withDisplay("Systolic blood pressure"))));
-
     }
 
     /**
@@ -140,6 +140,11 @@ public class CqlTypeOperatorsTest extends CqlExecutionTestBase {
         Context context = new Context(library);
         Object result = context.resolveExpressionRef("String25D5ToDecimal").getExpression().evaluate(context);
         assertThat(result, is(new BigDecimal("25.5")));
+
+        try {
+            result = context.resolveExpressionRef("StringInvalid").getExpression().evaluate(context);
+            Assert.fail();
+        } catch (IllegalArgumentException e) {}
     }
 
     /**

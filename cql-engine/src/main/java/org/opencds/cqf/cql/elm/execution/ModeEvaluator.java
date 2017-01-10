@@ -1,11 +1,10 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Quantity;
-import org.opencds.cqf.cql.runtime.Value;
-import java.util.Iterator;
+import org.opencds.cqf.cql.runtime.CqlList;
+
 import java.util.ArrayList;
-import java.math.BigDecimal;
+import java.util.Iterator;
 
 /*
 Mode(argument List<T>) T
@@ -20,41 +19,39 @@ If the source is null, the result is null.
 */
 public class ModeEvaluator extends org.cqframework.cql.elm.execution.Mode {
 
-  public static Object mode(Object source) {
+  @Override
+  public Object doOperation(Iterable<Object> operand) {
+    Iterator<Object> itr = operand.iterator();
 
-    if (source instanceof Iterable) {
-      Iterable<Object> element = (Iterable<Object>)source;
-      Iterator<Object> itr = element.iterator();
+    if (!itr.hasNext()) { return null; } // empty list
 
-      if (!itr.hasNext()) { return null; } // empty list
-      Object mode = new Object();
-      ArrayList<Object> values = new ArrayList<>();
-      while (itr.hasNext()) {
-        Object value = itr.next();
-        if (value != null) { values.add(value); }
-      }
-
-      if (values.isEmpty()) { return null; } // all null
-      values = MedianEvaluator.sortList(values);
-
-      int max = 0;
-      for (int i = 0; i < values.size(); ++i) {
-        int count = (values.lastIndexOf(values.get(i)) - i) + 1;
-        if (count > max) {
-          mode = values.get(i);
-          max = count;
-        }
-      }
-      return mode;
+    Object mode = new Object();
+    ArrayList<Object> values = new ArrayList<>();
+    while (itr.hasNext()) {
+      Object value = itr.next();
+      if (value != null) { values.add(value); }
     }
-    throw new IllegalArgumentException(String.format("Cannot Mode arguments of type '%s'.", source.getClass().getName()));
+
+    if (values.isEmpty()) { return null; } // all null
+    values = CqlList.sortList(values);
+
+    int max = 0;
+    for (int i = 0; i < values.size(); ++i) {
+      int count = (values.lastIndexOf(values.get(i)) - i) + 1;
+      if (count > max) {
+        mode = values.get(i);
+        max = count;
+      }
+    }
+    return mode;
   }
 
   @Override
   public Object evaluate(Context context) {
-    Object source = getSource().evaluate(context);
-    if (source == null) { return null; }
+    Object operand = getSource().evaluate(context);
 
-    return mode(source);
+    if ((Boolean) new IsNullEvaluator().doOperation((Iterable<Object>) operand)) { return null; }
+
+    return Execution.resolveAggregateDoOperation(this, operand);
   }
 }

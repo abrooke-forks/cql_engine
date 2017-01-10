@@ -15,16 +15,16 @@ If the argument is null, the result is null.
 public class LowerEvaluator extends org.cqframework.cql.elm.execution.Lower {
 
     @Override
+    public Object doOperation(String operand) {
+        return operand.toLowerCase();
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
+        Object operand = getOperand().evaluate(context);
 
-        if (value == null) {
-            return null;
-        }
+        if (operand == null) { return null; }
 
-        if (value instanceof String) {
-            return ((String) value).toLowerCase();
-        }
-        throw new IllegalArgumentException(String.format("Cannot %s with argument of type '%s'.", this.getClass().getSimpleName(), value.getClass().getName()));
+        return Execution.resolveStringDoOperation(this, operand);
     }
 }

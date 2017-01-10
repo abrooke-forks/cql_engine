@@ -1,7 +1,10 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Value;
+import org.opencds.cqf.cql.runtime.*;
+
+import java.math.BigDecimal;
+import java.util.Iterator;
 
 /*
 *** NOTES FOR CLINICAL OPERATORS ***
@@ -37,10 +40,94 @@ The ~ operator for lists returns true if and only if the lists contain elements 
 public class EquivalentEvaluator extends org.cqframework.cql.elm.execution.Equivalent {
 
     @Override
+    public Object doOperation(Boolean leftOperand, Boolean rightOperand) {
+        return leftOperand.equals(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Integer leftOperand, Integer rightOperand) {
+        return leftOperand.equals(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(BigDecimal leftOperand, BigDecimal rightOperand) {
+        return leftOperand.compareTo(rightOperand) == 0;
+    }
+
+    @Override
+    public Object doOperation(Quantity leftOperand, Quantity rightOperand) {
+        return leftOperand.equals(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(String leftOperand, String rightOperand) {
+        return leftOperand.equals(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Code leftOperand, Code rightOperand) {
+        return leftOperand.equals(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Concept leftOperand, Concept rightOperand) {
+        return leftOperand.equals(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(DateTime leftOperand, DateTime rightOperand) {
+        return leftOperand.equal(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Time leftOperand, Time rightOperand) {
+        return leftOperand.equal(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Interval leftOperand, Interval rightOperand) {
+        return leftOperand.equal(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Tuple leftOperand, Tuple rightOperand) {
+        return leftOperand.equal(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Uncertainty leftOperand, Uncertainty rightOperand) {
+        return leftOperand.equal(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Iterable<Object> leftOperand, Iterable<Object> rightOperand) {
+        Iterator<Object> leftIterator = leftOperand.iterator();
+        Iterator<Object> rightIterator = rightOperand.iterator();
+
+        while (leftIterator.hasNext()) {
+            Object leftObject = leftIterator.next();
+            if (rightIterator.hasNext()) {
+                Object rightObject = rightIterator.next();
+                Boolean elementEquals = (Boolean) Execution.resolveComparisonDoOperation(this, leftObject, rightObject);
+                if (elementEquals == null || !elementEquals) {
+                    return elementEquals;
+                }
+            }
+            else {
+                return false;
+            }
+        }
+
+        if (rightIterator.hasNext()) { return rightIterator.next() == null ? null : false; }
+
+        return true;
+    }
+
+    @Override
     public Object evaluate(Context context) {
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        return Value.equivalent(left, right);
+        return Execution.resolveComparisonDoOperation(this, left, right);
     }
 }

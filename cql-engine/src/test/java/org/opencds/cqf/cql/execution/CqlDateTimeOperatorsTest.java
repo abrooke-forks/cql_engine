@@ -381,22 +381,22 @@ public class CqlDateTimeOperatorsTest extends CqlExecutionTestBase {
         assertThat(result, is(-788));
 
         result = context.resolveExpressionRef("DateTimeDurationBetweenUncertainInterval").getExpression().evaluate(context);
-        assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(17, true, 44, true)));
+        assertThat(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(17, true, 44, true)), is(true));
 
         // result = context.resolveExpressionRef("DateTimeDurationBetweenUncertainInterval2").getExpression().evaluate(context);
         // assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(5, true, 17, true)));
 
         result = context.resolveExpressionRef("DateTimeDurationBetweenUncertainAdd").getExpression().evaluate(context);
-        assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(34, true, 88, true)));
+        assertThat(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(34, true, 88, true)), is(true));
 
         result = context.resolveExpressionRef("DateTimeDurationBetweenUncertainSubtract").getExpression().evaluate(context);
-        assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(12, true, 28, true)));
+        assertThat(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(12, true, 28, true)), is(true));
 
         result = context.resolveExpressionRef("DateTimeDurationBetweenUncertainMultiply").getExpression().evaluate(context);
-        assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(289, true, 1936, true)));
+        assertThat(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(289, true, 1936, true)), is(true));
 
         result = context.resolveExpressionRef("DateTimeDurationBetweenUncertainDiv").getExpression().evaluate(context);
-        assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(3, true, 2, true)));
+        assertThat(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(3, true, 2, true)), is(true));
 
         result = context.resolveExpressionRef("DateTimeDurationBetweenMonthUncertain").getExpression().evaluate(context);
         assertThat(result, is(true));
@@ -439,9 +439,8 @@ public class CqlDateTimeOperatorsTest extends CqlExecutionTestBase {
     public void testNow() throws JAXBException {
         Context context = new Context(library);
 
-        // TODO: the result is inconsistent -- sometimes true, sometimes not -- fix evaluator
-        // Object result = context.resolveExpressionRef("DateTimeNow").getExpression().evaluate(context);
-        // assertThat(result, is(true));
+         Object result = context.resolveExpressionRef("DateTimeNow").getExpression().evaluate(context);
+         assertThat(result, is(true));
     }
 
     /**
@@ -750,7 +749,7 @@ public class CqlDateTimeOperatorsTest extends CqlExecutionTestBase {
       try {
         result = context.resolveExpressionRef("DateTimeSubtractInvalidYears").getExpression().evaluate(context);
       } catch (ArithmeticException ae) {
-        assertThat(ae.getMessage(), is("The date time addition results in a year less than the accepted range."));
+        assertThat(ae.getMessage(), is("The date time subtraction results in a year less than the accepted range."));
       }
 
       result = context.resolveExpressionRef("DateTimeSubtract5Months").getExpression().evaluate(context);
@@ -830,9 +829,9 @@ public class CqlDateTimeOperatorsTest extends CqlExecutionTestBase {
     @Test
     public void testTimeOfDay() throws JAXBException {
         Context context = new Context(library);
-        // TODO: uncomment once Time(x,x,x,x,x) format is fixed
-        // Object result = context.resolveExpressionRef("TimeOfDayTest").getExpression().evaluate(context);
-        // assertThat(((Time)result).getPartial().getValue(0), is(10));
+        // TODO: TimeOfDay is being treated as a FunctionRef - much like the Time(x,x,x,x,x) issue
+//         Object result = context.resolveExpressionRef("TimeOfDayTest").getExpression().evaluate(context);
+//         assertThat(((Time)result).getPartial().getValue(0), is(4));
     }
 
     /**

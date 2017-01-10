@@ -28,53 +28,59 @@ If either argument is null, the result is null.
  */
 public class MultiplyEvaluator extends org.cqframework.cql.elm.execution.Multiply {
 
-  public static Object multiply(Object left, Object right) {
-    if (left == null || right == null) {
-        return null;
+    private BigDecimal verifyPrecision(BigDecimal operand) {
+      if (operand.precision() > 8) {
+        return operand.setScale(8, RoundingMode.FLOOR);
+      }
+      return operand;
     }
 
-    // *(Integer, Integer)
-    if (left instanceof Integer) {
-        return (Integer)left * (Integer)right;
+    @Override
+    public Object doOperation(Integer leftOperand, Integer rightOperand) {
+      return leftOperand * rightOperand;
     }
 
-    // *(Decimal, Decimal)
-    else if (left instanceof BigDecimal && right instanceof BigDecimal) {
-        return ((BigDecimal)left).multiply((BigDecimal)right).setScale(8, RoundingMode.FLOOR);
+    @Override
+    public Object doOperation(BigDecimal leftOperand, BigDecimal rightOperand) {
+      return verifyPrecision(leftOperand.multiply(rightOperand));
     }
 
-    // *(Quantity, Quantity)
-    else if (left instanceof Quantity && right instanceof Quantity) {
-      // TODO: unit multiplication i.e. cm*cm = cm^2
-      String unit = ((Quantity)left).getUnit();
-      return new Quantity().withValue((((Quantity)left).getValue()).multiply(((Quantity)right).getValue()).setScale(8, RoundingMode.FLOOR)).withUnit(unit);
+    @Override
+    public Object doOperation(Quantity leftOperand, Quantity rightOperand) {
+      return leftOperand.withValue(
+              verifyPrecision(leftOperand.getValue().multiply(rightOperand.getValue())));
     }
 
-    // *(Decimal, Quantity)
-    else if (left instanceof BigDecimal && right instanceof Quantity) {
-      return ((BigDecimal)left).multiply(((Quantity)right).getValue()).setScale(8, RoundingMode.FLOOR);
+    @Override
+    public Object doOperation(BigDecimal leftOperand, Quantity rightOperand) {
+      return rightOperand.withValue(
+              verifyPrecision(leftOperand.multiply(rightOperand.getValue())));
     }
 
-    // *(Quantity, Decimal)
-    else if (left instanceof Quantity && right instanceof BigDecimal) {
-      return (((Quantity)left).getValue()).multiply((BigDecimal)right).setScale(8, RoundingMode.FLOOR);
+    @Override
+    public Object doOperation(Quantity leftOperand, BigDecimal rightOperand) {
+      return leftOperand.withValue(
+              verifyPrecision(leftOperand.getValue().multiply(rightOperand)));
     }
 
-    // *(Uncertainty, Uncertainty)
-    else if (left instanceof Uncertainty && right instanceof Uncertainty) {
-      Interval leftInterval = ((Uncertainty)left).getUncertaintyInterval();
-      Interval rightInterval = ((Uncertainty)right).getUncertaintyInterval();
-      return new Uncertainty().withUncertaintyInterval(new Interval(multiply(leftInterval.getStart(), rightInterval.getStart()), true, multiply(leftInterval.getEnd(), rightInterval.getEnd()), true));
+    // NOTE: this operation signature is not specified in the spec.
+    // It is being used for uncertainty arithmetic
+    @Override
+    public Object doOperation(Uncertainty leftOperand, Uncertainty rightOperand) {
+      Interval leftInterval = leftOperand.getUncertaintyInterval();
+      Interval rightInterval = rightOperand.getUncertaintyInterval();
+      return new Uncertainty().withUncertaintyInterval(new Interval(
+              Execution.resolveSharedDoOperation(this, leftInterval.getStart(), rightInterval.getStart()), true,
+              Execution.resolveSharedDoOperation(this, leftInterval.getEnd(), rightInterval.getEnd()), true));
     }
-
-    throw new IllegalArgumentException(String.format("Cannot Multiply arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
-  }
 
     @Override
     public Object evaluate(Context context) {
-        Object left = getOperand().get(0).evaluate(context);
-        Object right = getOperand().get(1).evaluate(context);
+      Object left = getOperand().get(0).evaluate(context);
+      Object right = getOperand().get(1).evaluate(context);
 
-        return multiply(left, right);
+      if (left == null || right == null) { return null; }
+
+      return Execution.resolveArithmeticDoOperation(this, left, right);
     }
 }

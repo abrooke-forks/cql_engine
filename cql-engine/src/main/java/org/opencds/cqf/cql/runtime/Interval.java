@@ -1,14 +1,12 @@
 package org.opencds.cqf.cql.runtime;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.opencds.cqf.cql.runtime.Quantity;
-import org.opencds.cqf.cql.runtime.DateTime;
-import org.opencds.cqf.cql.runtime.Time;
-import org.opencds.cqf.cql.elm.execution.DurationBetweenEvaluator;
-import org.opencds.cqf.cql.elm.execution.SubtractEvaluator;
 import org.joda.time.Partial;
+import org.opencds.cqf.cql.elm.execution.*;
+
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.util.Comparator;
 
 /**
  * Created by Bryn on 4/15/2016.
@@ -37,11 +35,33 @@ public class Interval {
         }
     }
 
+    public static Comparator<Interval> sortInterval = new Comparator<Interval>() {
+        @Override
+        public int compare(Interval o1, Interval o2) {
+            if (o1.getStart() instanceof Integer) {
+                return ((Integer)o1.getStart()).compareTo((Integer)o2.getStart());
+            }
+            else if (o1.getStart() instanceof DateTime) {
+                return ((DateTime)o1.getStart()).compareTo((DateTime)o2.getStart());
+            }
+            else if (o1.getStart() instanceof Time) {
+                return ((Time)o1.getStart()).compareTo((Time)o2.getStart());
+            }
+            else if (o1.getStart() instanceof BigDecimal) {
+                return ((BigDecimal)o1.getStart()).compareTo((BigDecimal)o2.getStart());
+            }
+            else if (o1.getStart() instanceof Quantity) {
+                return (((Quantity)o1.getStart()).getValue().compareTo(((Quantity)o2.getStart()).getValue()));
+            }
+            throw new IllegalArgumentException(String.format("Cannot Collapse arguments of type '%s' and '%s'.", o1.getClass().getName(), o1.getClass().getName()));
+        }
+    };
+
     public static Object getSize(Object start, Object end) {
       if (start == null || end == null) { return null; }
 
       if (start instanceof Integer || start instanceof BigDecimal || start instanceof Quantity) {
-        return SubtractEvaluator.subtract(end, start);
+        return Execution.resolveArithmeticDoOperation(new SubtractEvaluator(), end, start);
       }
       else if (start instanceof DateTime) {
         return new Quantity()
@@ -99,18 +119,18 @@ public class Interval {
         }
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (!(other instanceof Interval)) {
-            return false;
-        }
+    public Boolean equal(Interval other) {
+        Object leftStart = this.getStart();
+        Object leftEnd = this.getEnd();
+        Object rightStart = other.getStart();
+        Object rightEnd = other.getEnd();
 
-        Interval otherInterval = (Interval)other;
-        // TODO: Use Boolean to enable null propagation...
-        return this.getLow() != null && this.getLow().equals(otherInterval.getLow())
-                && this.getLowClosed() == otherInterval.getLowClosed()
-                && this.getHigh() != null && this.getHigh().equals(otherInterval.getHigh())
-                && this.getHighClosed() == otherInterval.getHighClosed();
+        if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
+
+        return ((Boolean) Execution.resolveComparisonDoOperation(new EqualEvaluator(), leftStart, rightStart)
+                && this.getLowClosed() == other.getLowClosed()
+                && (Boolean) Execution.resolveComparisonDoOperation(new EqualEvaluator(), leftEnd, rightEnd))
+                && this.getHighClosed() == other.getHighClosed();
     }
 
     /*
@@ -148,18 +168,20 @@ public class Interval {
           return new Quantity().withValue((BigDecimal)successor(quantity.getValue())).withUnit(quantity.getUnit());
         }
         else if (value instanceof DateTime) {
-          if (Value.compareTo(value, maxValue(DateTime.class), ">=")) {
+          if ((Boolean) Execution.resolveComparisonDoOperation(new GreaterOrEqualEvaluator(), value, maxValue(DateTime.class))) {
             throw new RuntimeException("The result of the successor operation exceeds the maximum value allowed for type DateTime.");
           }
           DateTime dt = (DateTime)value;
-          return new DateTime().withPartial(dt.getPartial().property(DateTime.getField(dt.getPartial().size() - 1)).addToCopy(1));
+          return new DateTime().withPartial(dt.getPartial().property(DateTime.getField(dt.getPartial().size() - 1)).addToCopy(1))
+                  .withTimezoneOffset(dt.getTimezoneOffset());
         }
         else if (value instanceof Time) {
-          if (Value.compareTo(value, maxValue(Time.class), ">=")) {
+          if ((Boolean) Execution.resolveComparisonDoOperation(new GreaterOrEqualEvaluator(), value, maxValue(Time.class))) {
             throw new RuntimeException("The result of the successor operation exceeds the maximum value allowed for type Time.");
           }
           Time t = (Time)value;
-          return new Time().withPartial(t.getPartial().property(Time.getField(t.getPartial().size() - 1)).addToCopy(1));
+          return new Time().withPartial(t.getPartial().property(Time.getField(t.getPartial().size() - 1)).addToCopy(1))
+                  .withTimezoneOffset(t.getTimezoneOffset());
         }
 
         throw new NotImplementedException(String.format("Successor is not implemented for type %s", value.getClass().getName()));
@@ -180,18 +202,20 @@ public class Interval {
           return new Quantity().withValue((BigDecimal)predecessor(quantity.getValue())).withUnit(quantity.getUnit());
         }
         else if (value instanceof DateTime) {
-          if (Value.compareTo(value, minValue(DateTime.class), "<=")) {
+          if ((Boolean) Execution.resolveComparisonDoOperation(new LessOrEqualEvaluator(), value, minValue(DateTime.class))) {
             throw new RuntimeException("The result of the predecessor operation exceeds the minimum value allowed for type DateTime.");
           }
           DateTime dt = (DateTime)value;
-          return new DateTime().withPartial(dt.getPartial().property(DateTime.getField(dt.getPartial().size() - 1)).addToCopy(-1));
+          return new DateTime().withPartial(dt.getPartial().property(DateTime.getField(dt.getPartial().size() - 1)).addToCopy(-1))
+                  .withTimezoneOffset(dt.getTimezoneOffset());
         }
         else if (value instanceof Time) {
-          if (Value.compareTo(value, minValue(Time.class), "<=")) {
+          if ((Boolean) Execution.resolveComparisonDoOperation(new LessOrEqualEvaluator(), value, minValue(Time.class))) {
             throw new RuntimeException("The result of the predecessor operation exceeds the minimum value allowed for type Time.");
           }
           Time t = (Time)value;
-          return new Time().withPartial(t.getPartial().property(Time.getField(t.getPartial().size() - 1)).addToCopy(-1));
+          return new Time().withPartial(t.getPartial().property(Time.getField(t.getPartial().size() - 1)).addToCopy(-1))
+                  .withTimezoneOffset(t.getTimezoneOffset());
         }
 
         throw new NotImplementedException(String.format("Predecessor is not implemented for type %s", value.getClass().getName()));

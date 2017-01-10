@@ -1,7 +1,7 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Quantity;
+
 import java.math.BigDecimal;
 
 /*
@@ -18,21 +18,17 @@ If the argument is null, the result is null.
 public class FloorEvaluator extends org.cqframework.cql.elm.execution.Floor {
 
     @Override
+    public Object doOperation(BigDecimal operand) {
+        return BigDecimal.valueOf(Math.floor(operand.doubleValue())).intValue();
+    }
+
+
+    @Override
     public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
+        Object operand = getOperand().evaluate(context);
 
-        if (value == null) {
-            return null;
-        }
+        if (operand == null) { return null; }
 
-        if (value instanceof BigDecimal) {
-            return BigDecimal.valueOf(Math.floor(((BigDecimal)value).doubleValue())).intValue();
-        }
-
-        else if (value instanceof Quantity) {
-          return BigDecimal.valueOf(Math.floor(((Quantity)value).getValue().doubleValue())).intValue();
-        }
-
-        throw new IllegalArgumentException(String.format("Cannot perform Floor operation with argument of type '%s'.", value.getClass().getName()));
+        return Execution.resolveArithmeticDoOperation(this, operand);
     }
 }

@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -28,30 +27,26 @@ Note that the order of elements does not matter for the purposes of determining 
  */
 public class IncludesEvaluator extends org.cqframework.cql.elm.execution.Includes {
 
-  public static Object includes(Object left, Object right) {
-    if (left != null || right != null) {
-      if (left instanceof Interval) {
-        Object leftStart = ((Interval)left).getStart();
-        Object leftEnd = ((Interval)left).getEnd();
-        Object rightStart = ((Interval)right).getStart();
-        Object rightEnd = ((Interval)right).getEnd();
+  @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    Object leftStart = leftOperand.getStart();
+    Object leftEnd = leftOperand.getEnd();
+    Object rightStart = rightOperand.getStart();
+    Object rightEnd = rightOperand.getEnd();
 
-        if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
+    if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
 
-        return (Value.compareTo(leftStart, rightStart, "<=") && Value.compareTo(leftEnd, rightEnd, ">="));
-      }
+    return ((Boolean) Execution.resolveComparisonDoOperation(new LessOrEqualEvaluator(), leftStart, rightStart)
+                && (Boolean) Execution.resolveComparisonDoOperation(new GreaterOrEqualEvaluator(), leftEnd, rightEnd));
+  }
 
-      else if (left instanceof Iterable) {
-        for (Object rightElement : (Iterable)right) {
-            if (!InEvaluator.in(rightElement, (Iterable)left)) {
-                return false;
-            }
-        }
-        return true;
-      }
-      throw new IllegalArgumentException(String.format("Cannot Includes arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+  @Override
+  public Object doOperation(Iterable<Object> leftOperand, Iterable<Object> rightOperand) {
+    for (Object element : rightOperand) {
+      if (!(Boolean) Execution.resolveSharedDoOperation(new InEvaluator(), element, leftOperand))
+        return false;
     }
-    return null;
+    return true;
   }
 
   @Override
@@ -59,6 +54,8 @@ public class IncludesEvaluator extends org.cqframework.cql.elm.execution.Include
     Object left = getOperand().get(0).evaluate(context);
     Object right = getOperand().get(1).evaluate(context);
 
-    return includes(left, right);
+    if (left == null || right == null) { return null; }
+
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

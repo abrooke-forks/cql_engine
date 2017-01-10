@@ -1,7 +1,9 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Value;
+import org.opencds.cqf.cql.runtime.*;
+
+import java.math.BigDecimal;
 
 /*
 <=(left Integer, right Integer) Boolean
@@ -24,19 +26,72 @@ If either argument is null, the result is null.
  */
 public class LessOrEqualEvaluator extends org.cqframework.cql.elm.execution.LessOrEqual {
 
-  public static Object lessOrEqual(Object left, Object right) {
-    if (left == null || right == null) {
-        return null;
+    @Override
+    public Object doOperation(Integer leftOperand, Integer rightOperand) {
+        return leftOperand.compareTo(rightOperand) < 0
+                || leftOperand.compareTo(rightOperand) == 0;
     }
 
-    return Value.compareTo(left, right, "<=");
-  }
+    @Override
+    public Object doOperation(BigDecimal leftOperand, BigDecimal rightOperand) {
+        return leftOperand.compareTo(rightOperand) < 0
+                || leftOperand.compareTo(rightOperand) == 0;
+    }
+
+    @Override
+    public Object doOperation(Quantity leftOperand, Quantity rightOperand) {
+        return leftOperand.getValue().compareTo(rightOperand.getValue()) < 0
+                || leftOperand.getValue().compareTo(rightOperand.getValue()) == 0;
+    }
+
+    @Override
+    public Object doOperation(DateTime leftOperand, DateTime rightOperand) {
+        // Between evaluation hits this class -- need to account for possible Uncertainty
+        // May want to improve this logic -- will NullPointerException always be Uncertainty?
+        try {
+            return leftOperand.compareTo(rightOperand) < 0
+                    || leftOperand.compareTo(rightOperand) == 0;
+        } catch (NullPointerException ignored) {
+            return null;
+        }
+    }
+
+    @Override
+    public Object doOperation(Time leftOperand, Time rightOperand) {
+        // Between evaluation hits this class -- need to account for possible Uncertainty
+        // May want to improve this logic -- will NullPointerException always be Uncertainty?
+        try {
+            return leftOperand.compareTo(rightOperand) < 0
+                    || leftOperand.compareTo(rightOperand) == 0;
+        } catch (NullPointerException ignored) {
+            return null;
+        }
+    }
+
+    @Override
+    public Object doOperation(String leftOperand, String rightOperand) {
+        return leftOperand.compareTo(rightOperand) < 0
+                || leftOperand.compareTo(rightOperand) == 0;
+    }
+
+    // NOTE: this operation signature is not specified in the spec.
+    // It is being used for uncertainty comparisons
+    @Override
+    public Object doOperation(Uncertainty leftOperand, Integer rightOperand) {
+        if ((Boolean) new InEvaluator().doOperation(rightOperand, leftOperand.getUncertaintyInterval())) {
+            return null;
+        }
+        return ((Integer) leftOperand.getUncertaintyInterval().getEnd()).compareTo(rightOperand) < 0
+                || ((Integer) leftOperand.getUncertaintyInterval().getEnd()).compareTo(rightOperand) == 0;
+    }
 
     @Override
     public Object evaluate(Context context) {
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        return lessOrEqual(left, right);
+        if (left == null || right == null) { return null; }
+
+        return Execution.resolveComparisonDoOperation(this, left, right);
     }
 }

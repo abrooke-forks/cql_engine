@@ -15,16 +15,21 @@ If both arguments are false, the result is false. Otherwise, the result is null.
 public class OrEvaluator extends org.cqframework.cql.elm.execution.Or {
 
     @Override
-    public Object evaluate(Context context) {
-        Boolean left = (Boolean) getOperand().get(0).evaluate(context);
-        Boolean right = (Boolean) getOperand().get(1).evaluate(context);
-
-        if (left == null || right == null) {
-            if ((left != null && left == true) || (right != null && right == true)) {
+    public Object doOperation(Boolean leftOperand, Boolean rightOperand) {
+        if (leftOperand == null || rightOperand == null) {
+            if ((leftOperand != null && leftOperand) || (rightOperand != null && rightOperand)) {
                 return true;
             }
             return null;
         }
-        return (left || right);
+        return (leftOperand || rightOperand);
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Boolean left = (Boolean) getOperand().get(0).evaluate(context);
+        Boolean right = (Boolean) getOperand().get(1).evaluate(context);
+
+        return Execution.resolveLogicalDoOperation(this, left, right);
     }
 }

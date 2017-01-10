@@ -7,13 +7,22 @@ import org.opencds.cqf.cql.execution.Context;
 */
 public class IfEvaluator extends org.cqframework.cql.elm.execution.If {
 
+  private Context context;
+
+  @Override
+  public Object doOperation(Boolean operand) {
+    return operand ? getThen().evaluate(context) : getElse().evaluate(context);
+  }
+
   @Override
   public Object evaluate(Context context) {
-    Object condition = getCondition().evaluate(context);
+
+    Object operand = getCondition().evaluate(context);
+    this.context = context;
 
     // NOTE that if the condition evaluates to null, it is interpreted as false
-    if (condition == null) { condition = false; }
+    if (operand == null) { operand = false; }
 
-    return (Boolean)condition ? getThen().evaluate(context) : getElse().evaluate(context);
+    return Execution.resolveConditionalDoOperation(this, operand);
   }
 }

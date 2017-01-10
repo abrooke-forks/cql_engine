@@ -1,9 +1,8 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.opencds.cqf.cql.execution.Context;
 import org.cqframework.cql.elm.execution.CaseItem;
 import org.cqframework.cql.elm.execution.Expression;
-import org.opencds.cqf.cql.runtime.Value;
+import org.opencds.cqf.cql.execution.Context;
 
 /*
 
@@ -32,12 +31,19 @@ end
 */
 public class CaseEvaluator extends org.cqframework.cql.elm.execution.Case {
 
+  private Context context;
+
+  @Override
+  public Object doOperation(Expression operand) {
+    return operand == null ? standardCase(context) : selectedCase(context, operand.evaluate(context));
+  }
+
   public Object selectedCase(Context context, Object comparand) {
     for (CaseItem caseItem : getCaseItem()) {
       Object when = caseItem.getWhen().evaluate(context);
-      Boolean check = Value.equivalent(comparand, when);
+      Boolean check = (Boolean) Execution.resolveComparisonDoOperation(new EquivalentEvaluator(), comparand, when);
       if (check == null) { continue; }
-      else if (check) {
+      if (check) {
         return caseItem.getThen().evaluate(context);
       }
     }
@@ -58,6 +64,7 @@ public class CaseEvaluator extends org.cqframework.cql.elm.execution.Case {
   @Override
   public Object evaluate(Context context) {
     Expression comparand = getComparand();
-    return comparand == null ? standardCase(context) : selectedCase(context, comparand.evaluate(context));
+    this.context = context;
+    return Execution.resolveConditionalDoOperation(this, comparand);
   }
 }

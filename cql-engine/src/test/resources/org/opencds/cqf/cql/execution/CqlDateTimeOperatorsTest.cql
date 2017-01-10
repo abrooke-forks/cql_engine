@@ -146,7 +146,7 @@ define TimeDurationBetweenMillis: milliseconds between @T23:25:25.555 and @T23:2
 // TODO: Time uncertainty tests
 
 //Now
-define DateTimeNow: Now() = Now()
+define DateTimeNow: Now() <= Now()
 
 //SameAs
 define DateTimeSameAsYearTrue: DateTime(2014) same year as DateTime(2014)

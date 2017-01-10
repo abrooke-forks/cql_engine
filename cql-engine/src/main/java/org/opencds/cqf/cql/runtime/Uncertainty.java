@@ -1,9 +1,9 @@
 package org.opencds.cqf.cql.runtime;
 
-import org.opencds.cqf.cql.runtime.Quantity;
-import org.opencds.cqf.cql.runtime.DateTime;
-import org.opencds.cqf.cql.runtime.Interval;
-import org.joda.time.IllegalFieldValueException;
+import org.opencds.cqf.cql.elm.execution.Execution;
+import org.opencds.cqf.cql.elm.execution.GreaterEvaluator;
+import org.opencds.cqf.cql.elm.execution.LessEvaluator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -33,7 +33,7 @@ public class Uncertainty {
 
   public static boolean isUncertain(DateTime dt, String precision) {
     try {
-      int test = dt.getPartial().getValue(dt.getFieldIndex(precision));
+      dt.getPartial().getValue(DateTime.getFieldIndex(precision));
     } catch (IndexOutOfBoundsException e) {
       return true;
     }
@@ -42,7 +42,7 @@ public class Uncertainty {
 
   public static boolean isUncertain(Time t, String precision) {
     try {
-      int test = t.getPartial().getValue(t.getFieldIndex(precision));
+      t.getPartial().getValue(Time.getFieldIndex(precision));
     } catch (IndexOutOfBoundsException e) {
       return true;
     }
@@ -74,7 +74,7 @@ public class Uncertainty {
       if (idx == -1) { idx = DateTime.getFieldIndex2(precision); }
       if (idx != -1) {
         // expand the high and low date times with respective max and min values
-        return new ArrayList<DateTime>(Arrays.asList(DateTime.expandPartialMin(low, idx + 1), DateTime.expandPartialMax(high, idx + 1, high.getPartial().size())));
+        return new ArrayList<>(Arrays.asList(DateTime.expandPartialMin(low, idx + 1), DateTime.expandPartialMax(high, idx + 1, high.getPartial().size())));
       }
 
       else {
@@ -109,9 +109,8 @@ public class Uncertainty {
   }
 
   public static ArrayList<Interval> getLeftRightIntervals(Object left, Object right) {
-
-    Interval leftU = new Interval(0, true, 0, true);
-    Interval rightU = new Interval(0, true, 0, true);
+    Interval leftU;
+    Interval rightU;
 
     if (left instanceof Uncertainty && right instanceof Uncertainty) {
       leftU = ((Uncertainty)left).getUncertaintyInterval();
@@ -125,7 +124,32 @@ public class Uncertainty {
       leftU = Uncertainty.toUncertainty(left);
       rightU = ((Uncertainty)right).getUncertaintyInterval();
     }
-    return new ArrayList<Interval>(Arrays.asList(leftU, rightU));
+    return new ArrayList<>(Arrays.asList(leftU, rightU));
   }
 
+  public Integer compareTo(Uncertainty other) {
+    ArrayList<Interval> intervals = getLeftRightIntervals(this, other);
+    Interval leftU = intervals.get(0);
+    Interval rightU = intervals.get(1);
+
+    if ((Boolean) Execution.resolveComparisonDoOperation(new GreaterEvaluator(), leftU.getStart(), rightU.getEnd())) { return 1; }
+    if ((Boolean) Execution.resolveComparisonDoOperation(new LessEvaluator(), leftU.getStart(), rightU.getEnd())) { return -1; }
+    return null;
+  }
+
+  public Boolean equal(Object other) {
+    ArrayList<Interval> intervals = Uncertainty.getLeftRightIntervals(this, other);
+    Interval leftU = intervals.get(0);
+    Interval rightU = intervals.get(1);
+
+    if ((Boolean) Execution.resolveComparisonDoOperation(new LessEvaluator(), leftU.getEnd(), rightU.getStart()))
+    {
+      return false;
+    }
+    if ((Boolean) Execution.resolveComparisonDoOperation(new GreaterEvaluator(), leftU.getStart(), rightU.getEnd()))
+    {
+      return false;
+    }
+    return null;
+  }
 }

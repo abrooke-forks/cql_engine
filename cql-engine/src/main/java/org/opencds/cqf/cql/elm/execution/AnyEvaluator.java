@@ -1,11 +1,5 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Quantity;
-import org.opencds.cqf.cql.runtime.Value;
-import java.math.BigDecimal;
-import java.util.*;
-
 /*
 simple type Any
 

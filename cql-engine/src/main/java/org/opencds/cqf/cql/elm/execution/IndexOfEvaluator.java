@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Value;
 
 /*
 IndexOf(argument List<T>, element T) Integer
@@ -19,19 +18,12 @@ If the list argument is null, the result is null.
 public class IndexOfEvaluator extends org.cqframework.cql.elm.execution.IndexOf {
 
     @Override
-    public Object evaluate(Context context) {
-        Object source = getSource().evaluate(context);
-        Object elementToFind = getElement().evaluate(context);
-
-        if (source == null) {
-            return null;
-        }
-
+    public Object doOperation(Iterable<Object> leftOperand, Object rightOperand) {
         int index = -1;
         boolean nullSwitch = false;
-        for (Object element : (Iterable)source) {
+        for (Object element : leftOperand) {
             index++;
-            Boolean equiv = Value.equivalent(element, elementToFind);
+            Boolean equiv = (Boolean) Execution.resolveComparisonDoOperation(new EquivalentEvaluator(), element, rightOperand);
             if (equiv == null) { nullSwitch = true; }
             else if (equiv) {
                 return index;
@@ -39,5 +31,31 @@ public class IndexOfEvaluator extends org.cqframework.cql.elm.execution.IndexOf 
         }
         if (nullSwitch) { return null; }
         return -1;
+    }
+
+    @Override
+    public Object doOperation(Iterable<Object> leftOperand, Integer rightOperand) {
+        int index = -1;
+        boolean nullSwitch = false;
+        for (Object element : leftOperand) {
+            index++;
+            Boolean equiv = (Boolean) Execution.resolveComparisonDoOperation(new EquivalentEvaluator(), element, rightOperand);
+            if (equiv == null) { nullSwitch = true; }
+            else if (equiv) {
+                return index;
+            }
+        }
+        if (nullSwitch) { return null; }
+        return -1;
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Object left = getSource().evaluate(context);
+        Object right = getElement().evaluate(context);
+
+        if (left == null) { return null; }
+
+        return Execution.resolveListDoOperation(this, left, right);
     }
 }

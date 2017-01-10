@@ -20,22 +20,23 @@ If the argument is null, the result is null.
 public class ToBooleanEvaluator extends org.cqframework.cql.elm.execution.ToBoolean {
 
   @Override
-  public Object evaluate(Context context) {
-    Object value = getOperand().evaluate(context);
-
-    if (value == null) { return null; }
-
-    if (value instanceof String) {
-      String compare = ((String)value).toLowerCase();
-      if (compare.equals("true") || compare.equals("t") || compare.equals("yes") || compare.equals("y") || compare.equals("1")) {
-        return true;
-      }
-      else if (compare.equals("false") || compare.equals("f") || compare.equals("no") || compare.equals("n") || compare.equals("0")) {
-        return false;
-      }
-      throw new IllegalArgumentException(String.format("%s is not a valid String representation of a Boolean.", (String)value));
+  public Object doOperation(String operand) {
+    String compare = operand.toLowerCase();
+    if (compare.equals("true") || compare.equals("t") || compare.equals("yes") || compare.equals("y") || compare.equals("1")) {
+      return true;
     }
+    else if (compare.equals("false") || compare.equals("f") || compare.equals("no") || compare.equals("n") || compare.equals("0")) {
+      return false;
+    }
+    throw new IllegalArgumentException(String.format("%s is not a valid String representation of a Boolean.", operand));
+  }
 
-    throw new IllegalArgumentException(String.format("Cannot cast a value of type %s as Boolean - use String values.", value.getClass().getName()));
+  @Override
+  public Object evaluate(Context context) {
+    Object operand = getOperand().evaluate(context);
+
+    if (operand == null) { return null; }
+
+    return Execution.resolveTypeDoOperation(this, operand);
   }
 }

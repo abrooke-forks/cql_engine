@@ -15,7 +15,16 @@ If the argument evaluates to false, the result is true; otherwise, the result is
 public class IsFalseEvaluator extends org.cqframework.cql.elm.execution.IsFalse {
 
     @Override
+    public Object doOperation(Boolean operand) {
+        return Boolean.FALSE == operand;
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        return Boolean.FALSE == (Boolean) getOperand().evaluate(context);
+        Object operand = getOperand().evaluate(context);
+
+        if (operand == null) { operand = true; }
+
+        return Execution.resolveNullogicalDoOperation(this, operand);
     }
 }

@@ -1,6 +1,7 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
+import org.opencds.cqf.cql.runtime.DateTime;
 
 /*
 CalculateAgeInYearsAt(birthDate DateTime, asOf DateTime) Integer
@@ -22,17 +23,18 @@ The CalculateAgeAt operators are defined in terms of a DateTime duration calcula
 */
 public class CalculateAgeAtEvaluator extends org.cqframework.cql.elm.execution.CalculateAgeAt {
 
-  public static Object calculateAgeAt(Object birthDate, Object asOf, String precision) {
-    if (birthDate == null || asOf == null) { return null; }
-
-    return DurationBetweenEvaluator.durationBetween(birthDate, asOf, precision);
+  @Override
+  public Object doOperation(DateTime leftOperand, DateTime rightOperand) {
+    return new DurationBetweenEvaluator().withPrecision(getPrecision().value()).doOperation(leftOperand, rightOperand);
   }
 
   @Override
   public Object evaluate(Context context) {
-    Object birthDate = getOperand().get(0).evaluate(context);
-    Object asOf = getOperand().get(1).evaluate(context);
-    String precision = getPrecision().value();
-    return calculateAgeAt(birthDate, asOf, precision);
+    Object left = getOperand().get(0).evaluate(context);
+    Object right = getOperand().get(1).evaluate(context);
+
+    if (left == null || right == null) { return null; }
+
+    return Execution.resolveClinicalDoOperation(this, left, right);
   }
 }

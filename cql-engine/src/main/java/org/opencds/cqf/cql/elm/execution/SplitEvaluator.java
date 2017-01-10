@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /*
 Split(stringToSplit String, separator String) List<String>
@@ -18,23 +19,24 @@ If the stringToSplit argument does not contain any appearances of the separator,
 public class SplitEvaluator extends org.cqframework.cql.elm.execution.Split {
 
     @Override
-    public Object evaluate(Context context) {
-        Object stringToSplit = getStringToSplit().evaluate(context);
-        Object separator = getSeparator().evaluate(context);
-
-        if (stringToSplit == null) {
-            return null;
-        }
-
-        ArrayList<Object> result = new ArrayList<Object>();
-        if (separator == null) {
-            result.add(stringToSplit);
+    public Object doOperation(String leftOperand, String rightOperand) {
+        ArrayList<Object> result = new ArrayList<>();
+        if (rightOperand == null) {
+            result.add(leftOperand);
         }
         else {
-            for (String string : ((String)stringToSplit).split((String)separator)) {
-                result.add(string);
-            }
+            Collections.addAll(result, (leftOperand).split(rightOperand));
         }
         return result;
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Object left = getStringToSplit().evaluate(context);
+        Object right = getSeparator().evaluate(context);
+
+        if (left == null) { return null; }
+
+        return Execution.resolveStringDoOperation(this, left, right);
     }
 }

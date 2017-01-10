@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.elm.execution;
 
+import org.cqframework.cql.elm.execution.DateTimePrecision;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Time;
@@ -26,74 +27,62 @@ If either or both arguments are null, the result is null.
 public class SameAsEvaluator extends org.cqframework.cql.elm.execution.SameAs {
 
   @Override
+  public void setPrecision(DateTimePrecision value) {
+    super.setPrecision(value);
+  }
+
+  public SameAsEvaluator withPrecision(DateTimePrecision value) {
+    setPrecision(value);
+    return this;
+  }
+
+  @Override
+  public Object doOperation(DateTime leftOperand, DateTime rightOperand) {
+    int idx = DateTime.getFieldIndex(precision.value());
+
+    if (idx != -1) {
+      // check level of precision
+      if (idx + 1 > leftOperand.getPartial().size() || idx + 1 > rightOperand.getPartial().size()) {
+        return null;
+      }
+
+      for (int i = 0; i < idx + 1; ++i) {
+        if (leftOperand.getPartial().getValue(i) != rightOperand.getPartial().getValue(i)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision.value()));
+  }
+
+  @Override
+  public Object doOperation(Time leftOperand, Time rightOperand) {
+    int idx = Time.getFieldIndex(precision.value());
+
+    if (idx != -1) {
+      // check level of precision
+      if (idx + 1 > leftOperand.getPartial().size() || idx + 1 > rightOperand.getPartial().size()) {
+        return null;
+      }
+
+      for (int i = 0; i < idx + 1; ++i) {
+        if (leftOperand.getPartial().getValue(i) != rightOperand.getPartial().getValue(i)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision.value()));
+  }
+
+  @Override
   public Object evaluate(Context context) {
     Object left = getOperand().get(0).evaluate(context);
     Object right = getOperand().get(1).evaluate(context);
 
     if (left == null || right == null) { return null; }
 
-    if (left instanceof DateTime && right instanceof DateTime) {
-      DateTime leftDT = (DateTime)left;
-      DateTime rightDT = (DateTime)right;
-      String precision = getPrecision().value();
-
-      if (precision == null) {
-        throw new IllegalArgumentException("Precision must be specified.");
-      }
-
-      int idx = DateTime.getFieldIndex(precision);
-
-      if (idx != -1) {
-        // check level of precision
-        if (idx + 1 > leftDT.getPartial().size() || idx + 1 > rightDT.getPartial().size()) {
-          return null;
-        }
-
-        for (int i = 0; i < idx + 1; ++i) {
-          if (leftDT.getPartial().getValue(i) != rightDT.getPartial().getValue(i)) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-      }
-    }
-
-    if (left instanceof Time && right instanceof Time) {
-      Time leftT = (Time)left;
-      Time rightT = (Time)right;
-      String precision = getPrecision().value();
-
-      if (precision == null) {
-        throw new IllegalArgumentException("Precision must be specified.");
-      }
-
-      int idx = Time.getFieldIndex(precision);
-
-      if (idx != -1) {
-        // check level of precision
-        if (idx + 1 > leftT.getPartial().size() || idx + 1 > rightT.getPartial().size()) {
-          return null;
-        }
-
-        for (int i = 0; i < idx + 1; ++i) {
-          if (leftT.getPartial().getValue(i) != rightT.getPartial().getValue(i)) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-      }
-    }
-
-    throw new IllegalArgumentException(String.format("Cannot SameAs arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+    return Execution.resolveDateTimeDoOperation(this, left, right);
   }
 }

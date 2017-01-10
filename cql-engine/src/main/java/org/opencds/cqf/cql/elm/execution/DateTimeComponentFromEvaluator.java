@@ -23,47 +23,53 @@ If the argument is null, or is not specified to the level of precision being ext
 */
 public class DateTimeComponentFromEvaluator extends org.cqframework.cql.elm.execution.DateTimeComponentFrom {
 
+  private String precision;
+  public void setPrecision(String precision) {
+    this.precision = precision;
+  }
+
+  public DateTimeComponentFromEvaluator withPrecision(String precision) {
+    setPrecision(precision);
+    return this;
+  }
+
+  @Override
+  public Object doOperation(DateTime operand) {
+    int idx = DateTime.getFieldIndex(precision);
+
+    if (idx != -1) {
+      // check level of precision
+      if (idx + 1 > operand.getPartial().size()) {
+        return null;
+      }
+      return operand.getPartial().getValue(idx);
+    }
+
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
+  }
+
+  @Override
+  public Object doOperation(Time operand) {
+    int idx = Time.getFieldIndex(precision);
+
+    if (idx != -1) {
+      // check level of precision
+      if (idx + 1 > operand.getPartial().size()) {
+        return null;
+      }
+      return operand.getPartial().getValue(idx);
+    }
+
+     throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
+  }
+
   @Override
   public Object evaluate(Context context) {
     Object operand = getOperand().evaluate(context);
-    String precision = getPrecision().value();
+    precision = getPrecision().value();
 
-    if (precision == null) {
-      throw new IllegalArgumentException("Precision must be specified.");
-    }
+    if (operand == null) { return null; }
 
-    if (operand instanceof DateTime) {
-      DateTime dateTime = (DateTime)operand;
-      int idx = DateTime.getFieldIndex(precision);
-
-      if (idx != -1) {
-        // check level of precision
-        if (idx + 1 > dateTime.getPartial().size()) {
-          return null;
-        }
-        return dateTime.getPartial().getValue(idx);
-      }
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-      }
-    }
-
-    else if (operand instanceof Time) {
-      Time time = (Time)operand;
-
-      int idx = Time.getFieldIndex(precision);
-
-      if (idx != -1) {
-        // check level of precision
-        if (idx + 1 > time.getPartial().size()) {
-          return null;
-        }
-        return time.getPartial().getValue(idx);
-      }
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-      }
-    }
-    throw new IllegalArgumentException(String.format("Cannot DateTimeComponentFrom arguments of type '%s'.", operand.getClass().getName()));
+    return Execution.resolveDateTimeDoOperation(this, operand);
   }
 }

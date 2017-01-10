@@ -16,18 +16,21 @@ If the argument is null, the result is null.
 public class LastEvaluator extends org.cqframework.cql.elm.execution.Last {
 
     @Override
-    public Object evaluate(Context context) {
-        Object value = getSource().evaluate(context);
-
-        if (value == null) {
-            return null;
-        }
-
+    public Object doOperation(Iterable<Object> operand) {
         Object result = null;
-        for (Object element : (Iterable)value) {
+        for (Object element : operand) {
             result = element;
         }
 
         return result;
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = getSource().evaluate(context);
+
+        if (operand == null) { return null; }
+
+        return Execution.resolveListDoOperation(this, operand);
     }
 }

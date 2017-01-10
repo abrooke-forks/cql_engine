@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.execution;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.opencds.cqf.cql.runtime.*;
 import java.math.BigDecimal;
@@ -34,7 +35,7 @@ public class CqlTypesTest extends CqlExecutionTestBase {
         assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {9, 0, 0, 0})));
 
         result = context.resolveExpressionRef("AnyInterval").getExpression().evaluate(context);
-        assertThat(result, is(new Interval(2, true, 7, true)));
+        assertThat(((Interval)result).equal(new Interval(2, true, 7, true)), is(true));
 
         result = context.resolveExpressionRef("AnyList").getExpression().evaluate(context);
         assertThat(result, is(Arrays.asList(1, 2, 3)));
@@ -106,7 +107,7 @@ public class CqlTypesTest extends CqlExecutionTestBase {
       assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2015, 2, 10})));
 
       result = context.resolveExpressionRef("DateTimeUncertain").getExpression().evaluate(context);
-      assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(19, true, 49, true)));
+      assertThat(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(19, true, 49, true)), is(true));
 
       result = context.resolveExpressionRef("DateTimeMin").getExpression().evaluate(context);
       assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {0001, 1, 1, 0, 0, 0, 0})));
@@ -136,15 +137,19 @@ public class CqlTypesTest extends CqlExecutionTestBase {
     @Test
     public void testInteger() throws JAXBException {
         Context context = new Context(library);
-        // NOTE: These result in compile-time integer number is too large error, which is correct
-        // Object result = context.resolveExpressionRef("IntegerUpperBoundExcept").getExpression().evaluate(context);
-        // assertThat(result, is(new Integer(2147483649)));
-        //
-        // result = context.resolveExpressionRef("IntegerLowerBoundExcept").getExpression().evaluate(context);
-        // assertThat(result, is(new Integer(-2147483649)));
+        Object result;
+        try {
+            result = context.resolveExpressionRef("IntegerLowerBoundExcept").getExpression().evaluate(context);
+            Assert.fail();
+        } catch (RuntimeException ignored) {}
 
-        Object result = context.resolveExpressionRef("IntegerProper").getExpression().evaluate(context);
-        assertThat(result, is(new Integer(5000)));
+        try {
+            result = context.resolveExpressionRef("IntegerLowerBoundExcept").getExpression().evaluate(context);
+            Assert.fail();
+        } catch (RuntimeException ignored) {}
+
+        result = context.resolveExpressionRef("IntegerProper").getExpression().evaluate(context);
+        assertThat((Integer) result, comparesEqualTo(5000));
     }
 
     /**
@@ -172,8 +177,9 @@ public class CqlTypesTest extends CqlExecutionTestBase {
         assertThat(result, is("\\'I start with a single quote and end with a double quote\\\""));
 
         // NOTE: This test returns "\u0048\u0069" instead of the string equivalent "Hi"
-        // result = context.resolveExpressionRef("StringUnicodeTest").getExpression().evaluate(context);
-        // assertThat(result, is(new String("Hi")));
+        // TODO: perhaps "unescaping" the string should occur somewhere else...
+        result = context.resolveExpressionRef("StringUnicodeTest").getExpression().evaluate(context);
+        assertThat(org.apache.commons.lang3.StringEscapeUtils.unescapeJava((String)result), comparesEqualTo("Hi"));
     }
 
     /**

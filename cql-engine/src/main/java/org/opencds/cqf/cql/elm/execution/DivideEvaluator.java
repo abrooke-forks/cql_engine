@@ -2,7 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Quantity;
-import org.opencds.cqf.cql.runtime.Value;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,29 +25,48 @@ If either argument is null, the result is null.
  */
 public class DivideEvaluator extends org.cqframework.cql.elm.execution.Divide {
 
-  public static Object divide(Object left, Object right) {
-
-    if (left == null || right == null) {
-        return null;
+  private Object verifyPrecision(BigDecimal operand) {
+    if (operand.precision() > 8) {
+      return operand.setScale(8, RoundingMode.FLOOR);
     }
+    return operand;
+  }
 
-    if (left instanceof BigDecimal && right instanceof BigDecimal) {
-      if (Value.compareTo(right, new BigDecimal("0.0"), "==")) { return null; }
-      return ((BigDecimal)left).divide((BigDecimal)right, 8, RoundingMode.FLOOR);
+  private Object verifyPrecision(Quantity operand) {
+    if (operand.getValue().precision() > 8) {
+      return operand.getValue().setScale(8, RoundingMode.FLOOR);
     }
+    return operand;
+  }
 
-    else if (left instanceof Quantity && right instanceof Quantity) {
-      if (Value.compareTo(((Quantity)right).getValue(), new BigDecimal(0), "==")) { return null; }
-      return new Quantity().withValue((((Quantity)left).getValue()).divide(((Quantity)right).getValue(), 8, RoundingMode.FLOOR)).withUnit(((Quantity)left).getUnit());
+  @Override
+  public Object doOperation(BigDecimal leftOperand, BigDecimal rightOperand) {
+    if (rightOperand.equals(new BigDecimal("0"))) { return null; }
+    try {
+      return verifyPrecision(leftOperand.divide(rightOperand));
+    } catch (ArithmeticException ae) {
+      return leftOperand.divide(rightOperand, 8, RoundingMode.FLOOR);
     }
+  }
 
-    else if (left instanceof Quantity && right instanceof BigDecimal) {
-      if (Value.compareTo(right, new BigDecimal("0.0"), "==")) { return null; }
-      return new Quantity().withValue((((Quantity)left).getValue()).divide((BigDecimal)right, 8, RoundingMode.FLOOR)).withUnit(((Quantity)left).getUnit());
+  @Override
+  public Object doOperation(Quantity leftOperand, Quantity rightOperand) {
+    if (rightOperand.getValue().equals(new BigDecimal("0"))) { return null; }
+    try {
+      return verifyPrecision(leftOperand.withValue(leftOperand.getValue().divide(rightOperand.getValue())));
+    } catch (ArithmeticException ae) {
+      return leftOperand.withValue(leftOperand.getValue().divide(rightOperand.getValue(), 8, RoundingMode.FLOOR));
     }
+  }
 
-    throw new IllegalArgumentException(String.format("Cannot Divide arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
-
+  @Override
+  public Object doOperation(Quantity leftOperand, BigDecimal rightOperand) {
+    if (rightOperand.equals(new BigDecimal("0"))) { return null; }
+    try {
+      return verifyPrecision(leftOperand.withValue(leftOperand.getValue().divide(rightOperand)));
+    } catch (ArithmeticException ae) {
+      return leftOperand.withValue(leftOperand.getValue().divide(rightOperand, 8, RoundingMode.FLOOR));
+    }
   }
 
     @Override
@@ -56,6 +74,10 @@ public class DivideEvaluator extends org.cqframework.cql.elm.execution.Divide {
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        return divide(left, right);
+      if (left == null || right == null) {
+        return null;
+      }
+
+        return Execution.resolveArithmeticDoOperation(this, left, right);
     }
 }

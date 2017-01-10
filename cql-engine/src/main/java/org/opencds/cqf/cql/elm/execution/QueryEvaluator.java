@@ -4,12 +4,12 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.cqframework.cql.elm.execution.AliasedQuerySource;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.execution.Variable;
-import org.opencds.cqf.cql.runtime.Value;
+import org.opencds.cqf.cql.runtime.CqlList;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.opencds.cqf.cql.runtime.Value.ensureIterable;
+import static org.opencds.cqf.cql.runtime.CqlList.ensureIterable;
 
 /**
  * Created by Bryn on 5/25/2016.
@@ -66,10 +66,10 @@ public class QueryEvaluator extends org.cqframework.cql.elm.execution.Query {
             for (org.cqframework.cql.elm.execution.SortByItem byItem : sortClause.getBy()) {
                 String direction = byItem.getDirection().value();
                 if (direction == null || direction.equals("asc") || direction.equals("ascending")) {
-                    java.util.Collections.sort(result, Value.valueSort);
+                    java.util.Collections.sort(result, CqlList.valueSort);
                 }
                 else if (direction.equals("desc") || direction.equals("descending")) {
-                    java.util.Collections.sort(result, Value.valueSort);
+                    java.util.Collections.sort(result, CqlList.valueSort);
                     java.util.Collections.reverse(result);
                 }
             }
@@ -110,7 +110,7 @@ public class QueryEvaluator extends org.cqframework.cql.elm.execution.Query {
         }
 
         if (this.getReturn() != null && this.getReturn().isDistinct()) {
-            result = DistinctEvaluator.distinct(result);
+            result = (List<Object>) Execution.resolveListDoOperation(new DistinctEvaluator(), result);
         }
         sortResult(result);
 
@@ -153,7 +153,7 @@ public class QueryEvaluator extends org.cqframework.cql.elm.execution.Query {
         }
 
         if (this.getReturn() != null && this.getReturn().isDistinct()) {
-            result = DistinctEvaluator.distinct(result);
+            result = (List<Object>) Execution.resolveListDoOperation(new DistinctEvaluator(), result);
         }
         sortResult(result);
 

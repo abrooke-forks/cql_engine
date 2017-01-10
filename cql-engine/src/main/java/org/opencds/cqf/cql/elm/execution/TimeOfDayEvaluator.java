@@ -16,7 +16,12 @@ See the Now operator for more information on the rationale for defining the Time
 public class TimeOfDayEvaluator extends org.cqframework.cql.elm.execution.TimeOfDay {
 
   @Override
-  public Object evaluate(Context context) {
+  public Object doOperation() {
     return Time.getTimeOfDay();
+  }
+
+  @Override
+  public Object evaluate(Context context) {
+    return Execution.resolveDateTimeDoOperation(this);
   }
 }

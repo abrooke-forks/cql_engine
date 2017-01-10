@@ -26,36 +26,33 @@ If either argument is null, the result is null.
 public class IndexerEvaluator extends org.cqframework.cql.elm.execution.Indexer {
 
     @Override
+    public Object doOperation(String leftOperand, Integer rightOperand) {
+        if(rightOperand < 0 || rightOperand >= leftOperand.length()){
+            return null;
+        }
+
+        return "" + leftOperand.charAt(rightOperand);
+    }
+
+    @Override
+    public Object doOperation(Iterable<Object> leftOperand, Integer rightOperand) {
+        int index = -1;
+        for (Object element : leftOperand) {
+            index++;
+            if (rightOperand == index) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Object evaluate(Context context) {
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        if (left == null || right == null) {
-            return null;
-        }
+        if (left == null || right == null) { return null; }
 
-        if (left instanceof String) {
-            if (right instanceof Integer) {
-                if((int)right < 0 || (int)right >= ((String)left).length()){
-                    return null;
-                }
-
-                return "" + ((String) left).charAt((int) right);
-            }
-        }
-
-        if (left instanceof Iterable) {
-            if (right instanceof Integer) {
-                int index = -1;
-                for (Object element : (Iterable)left) {
-                    index++;
-                    if ((Integer)right == index) {
-                        return element;
-                    }
-                }
-                return null;
-            }
-        }
-        throw new IllegalArgumentException(String.format("Cannot %s arguments of type '%s' and '%s'.", this.getClass().getSimpleName(), left.getClass().getName(), right.getClass().getName()));
+        return Execution.resolveSharedDoOperation(this, left, right);
     }
 }

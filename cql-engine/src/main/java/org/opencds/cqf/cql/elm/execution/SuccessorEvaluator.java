@@ -1,7 +1,11 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
+import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Interval;
+import org.opencds.cqf.cql.runtime.Time;
+
+import java.math.BigDecimal;
 
 /*
 successor of<T>(argument T) T
@@ -23,8 +27,31 @@ If the argument is null, the result is null.
 public class SuccessorEvaluator extends org.cqframework.cql.elm.execution.Successor {
 
     @Override
+    public Object doOperation(Integer operand) {
+        return Interval.successor(operand);
+    }
+
+    @Override
+    public Object doOperation(BigDecimal operand) {
+        return Interval.successor(operand);
+    }
+
+    @Override
+    public Object doOperation(DateTime operand) {
+        return Interval.successor(operand);
+    }
+
+    @Override
+    public Object doOperation(Time operand) {
+        return Interval.successor(operand);
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        Object argument = this.getOperand().evaluate(context);
-        return Interval.successor(argument);
+        Object operand = this.getOperand().evaluate(context);
+
+        if (operand == null) { return null; }
+
+        return Execution.resolveArithmeticDoOperation(this, operand);
     }
 }

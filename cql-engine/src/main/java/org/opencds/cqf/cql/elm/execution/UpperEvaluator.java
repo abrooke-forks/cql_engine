@@ -15,16 +15,16 @@ If the argument is null, the result is null.
 public class UpperEvaluator extends org.cqframework.cql.elm.execution.Upper {
 
     @Override
+    public Object doOperation(String operand) {
+        return operand.toUpperCase();
+    }
+
+    @Override
     public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
+        Object operand = getOperand().evaluate(context);
 
-        if (value == null) {
-            return null;
-        }
+        if (operand == null) { return null; }
 
-        if (value instanceof String) {
-            return ((String)value).toUpperCase();
-        }
-        throw new IllegalArgumentException(String.format("Cannot %s with argument of type '%s'.", this.getClass().getSimpleName(), value.getClass().getName()));
+        return Execution.resolveStringDoOperation(this, operand);
     }
 }

@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.elm.execution;
 import org.opencds.cqf.cql.execution.Context;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /*
 Ln(argument Decimal) Decimal
@@ -17,30 +18,36 @@ If the argument is null, the result is null.
  */
 public class LnEvaluator extends org.cqframework.cql.elm.execution.Ln {
 
-    @Override
-    public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
-
-        if (value == null) {
-            return null;
+    private BigDecimal verifyPrecision(BigDecimal operand) {
+        if (operand.precision() > 8) {
+            return operand.setScale(8, RoundingMode.FLOOR);
         }
+        return operand;
+    }
 
-        if (value instanceof BigDecimal){
-          BigDecimal retVal = new BigDecimal(0);
-          try {
-            retVal = new BigDecimal(Math.log(((BigDecimal)value).doubleValue()));
-          } catch (NumberFormatException nfe){
-            if (((BigDecimal)value).compareTo(new BigDecimal(0)) < 0) {
-              return null;
+    @Override
+    public Object doOperation(BigDecimal operand) {
+        BigDecimal retVal;
+        try {
+            retVal = verifyPrecision(new BigDecimal(Math.log(operand.doubleValue())));
+        } catch (NumberFormatException nfe){
+            if (operand.compareTo(new BigDecimal(0)) < 0) {
+                return null;
             }
-            else if (((BigDecimal)value).compareTo(new BigDecimal(0)) == 0) {
-              throw new ArithmeticException("Results in negative infinity");
+            else if (operand.compareTo(new BigDecimal(0)) == 0) {
+                throw new ArithmeticException("Results in negative infinity");
             }
             else { throw new NumberFormatException(); }
-          }
-            return retVal;
         }
+        return retVal;
+    }
 
-        throw new IllegalArgumentException(String.format("Cannot Natural Log with argument of type '%s'.", value.getClass().getName()));
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = getOperand().evaluate(context);
+
+        if (operand == null) { return null; }
+
+        return Execution.resolveArithmeticDoOperation(this, operand);
     }
 }

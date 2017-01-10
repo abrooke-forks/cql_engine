@@ -20,18 +20,21 @@ If the argument is null, the result is null.
 public class ToIntegerEvaluator extends org.cqframework.cql.elm.execution.ToInteger {
 
   @Override
-  public Object evaluate(Context context) {
-    Object value = getOperand().evaluate(context);
-
-    if (value == null) { return null; }
-
-    if (value instanceof String) {
-      try {
-        return Integer.parseInt((String)value);
-      } catch (NumberFormatException nfe) {
-        throw new NumberFormatException("Unable to convert given string to Integer");
-      }
+  public Object doOperation(String operand) {
+    try {
+      return Integer.parseInt(operand);
     }
-    throw new IllegalArgumentException(String.format("Cannot cast a value of type %s as Boolean - use String values.", value.getClass().getName()));
+    catch (NumberFormatException nfe) {
+      throw new NumberFormatException("Unable to convert given string to Integer");
+    }
+  }
+
+  @Override
+  public Object evaluate(Context context) {
+    Object operand = getOperand().evaluate(context);
+
+    if (operand == null) { return null; }
+
+    return Execution.resolveTypeDoOperation(this, operand);
   }
 }

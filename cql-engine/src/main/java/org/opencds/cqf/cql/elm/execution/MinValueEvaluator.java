@@ -26,7 +26,7 @@ For any other type, attempting to invoke minimum results in an error.
 public class MinValueEvaluator extends org.cqframework.cql.elm.execution.MinValue {
 
     @Override
-    public Object evaluate(Context context) {
+    public Object doOperation() {
         switch (valueType.getLocalPart()) {
             case "Integer": return Interval.minValue(Integer.class);
             case "Decimal": return Interval.minValue(BigDecimal.class);
@@ -35,5 +35,10 @@ public class MinValueEvaluator extends org.cqframework.cql.elm.execution.MinValu
             case "Time": return Interval.minValue(Time.class);
             default: throw new NotImplementedException(String.format("MinValue not implemented for type %s", valueType.getLocalPart()));
         }
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        return Execution.resolveArithmeticDoOperation(this);
     }
 }

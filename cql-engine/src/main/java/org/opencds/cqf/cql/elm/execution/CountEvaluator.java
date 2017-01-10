@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import java.util.Iterator;
 
 /*
 Count(argument List<T>) Integer
@@ -18,25 +17,23 @@ Count(argument List<T>) Integer
 public class CountEvaluator extends org.cqframework.cql.elm.execution.Count {
 
   @Override
-  public Object evaluate(Context context) {
+  public Object doOperation(Iterable<Object> operand) {
+    int count = 0;
 
-    Object source = getSource().evaluate(context);
-    if (source == null) { return null; }
-
-    Integer size = new Integer(0);
-
-    if (source instanceof Iterable) {
-      Iterable<Object> element = (Iterable<Object>)source;
-      Iterator<Object> itr = element.iterator();
-
-      if (!itr.hasNext()) { return size; } // empty list
-      while (itr.hasNext()) {
-        Object value = itr.next();
-        if (value == null) { continue; } // skip null
-        ++size;
-      }
+    for (Object value : operand) {
+      if (value != null) { ++count; } // skip null
     }
-    else { return null; }
-    return size;
+
+    return count;
+  }
+
+  @Override
+  public Object evaluate(Context context) {
+    Object operand = getSource().evaluate(context);
+
+    // The list may contain all nulls for this list operator
+    if (operand == null) { return null; }
+
+    return Execution.resolveAggregateDoOperation(this, operand);
   }
 }

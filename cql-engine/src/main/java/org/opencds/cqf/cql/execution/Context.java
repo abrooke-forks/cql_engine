@@ -114,6 +114,9 @@ public class Context {
         else if (typeSpecifier instanceof ListTypeSpecifier) {
             return resolveType(((ListTypeSpecifier)typeSpecifier).getElementType());
         }
+        else if (typeSpecifier instanceof IntervalTypeSpecifier) {
+            return resolveType(((IntervalTypeSpecifier)typeSpecifier).getPointType());
+        }
         else {
             throw new IllegalArgumentException(String.format("Resolution for %s type specifiers not implemented yet.",
                     typeSpecifier.getClass().getName()));

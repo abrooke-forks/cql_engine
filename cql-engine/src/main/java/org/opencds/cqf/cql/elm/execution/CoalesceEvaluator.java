@@ -1,8 +1,10 @@
 package org.opencds.cqf.cql.elm.execution;
 
+import org.cqframework.cql.elm.execution.Expression;
 import org.opencds.cqf.cql.execution.Context;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Iterator;
 
 /*
 Coalesce<T>(argument1 T, argument2 T) T
@@ -20,19 +22,22 @@ The static type of the first argument determines the type of the result, and all
  * Created by Bryn on 5/25/2016.
  */
 public class CoalesceEvaluator extends org.cqframework.cql.elm.execution.Coalesce {
-    @Override
-    public Object evaluate(Context context) {
-        List<org.cqframework.cql.elm.execution.Expression> operands = getOperand();
 
-        Iterator<org.cqframework.cql.elm.execution.Expression> expressions = operands.iterator();
-        while (expressions.hasNext()) {
-            org.cqframework.cql.elm.execution.Expression expression = expressions.next();
+    private Context context;
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    public Object doOperation(Iterable<Object> operand) {
+        List<Expression> operands = new ArrayList<>();
+        operand.forEach(ae -> operands.add((Expression) ae));
+
+        for (Expression expression : operands) {
             Object tmpVal = expression.evaluate(context);
             if (tmpVal != null) {
                 if (tmpVal instanceof Iterable && operands.size() == 1) {
-                    Iterator<Object> elemsItr = ((Iterable) tmpVal).iterator();
-                    while (elemsItr.hasNext()) {
-                        Object obj = elemsItr.next();
+                    for (Object obj : ((Iterable) tmpVal)) {
                         if (obj != null) {
                             return obj;
                         }
@@ -43,5 +48,13 @@ public class CoalesceEvaluator extends org.cqframework.cql.elm.execution.Coalesc
             }
         }
         return null;
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = getOperand();
+        this.context = context;
+
+        return Execution.resolveNullogicalDoOperation(this, operand);
     }
 }

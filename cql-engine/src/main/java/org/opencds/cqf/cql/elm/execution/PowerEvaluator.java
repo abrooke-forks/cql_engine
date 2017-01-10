@@ -2,6 +2,7 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /*
 ^(argument Integer, exponent Integer) Integer
@@ -17,26 +18,33 @@ If either argument is null, the result is null.
  */
 public class PowerEvaluator extends org.cqframework.cql.elm.execution.Power {
 
+    private BigDecimal verifyPrecision(BigDecimal operand) {
+        if (operand.precision() > 8) {
+            return operand.setScale(8, RoundingMode.FLOOR);
+        }
+        return operand;
+    }
+
+    @Override
+    public Object doOperation(Integer leftOperand, Integer rightOperand) {
+        if (rightOperand < 0) {
+            return verifyPrecision(new BigDecimal(Math.pow((double) leftOperand, (double) rightOperand)));
+        }
+        return new BigDecimal(Math.pow((double) leftOperand, (double) rightOperand)).intValue();
+    }
+
+    @Override
+    public Object doOperation(BigDecimal leftOperand, BigDecimal rightOperand) {
+        return verifyPrecision(new BigDecimal(Math.pow((leftOperand.doubleValue()), rightOperand.doubleValue())));
+    }
+
     @Override
     public Object evaluate(Context context) {
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        if (left == null || right == null) {
-            return null;
-        }
+        if (left == null || right == null) { return null; }
 
-        if (left instanceof Integer) {
-            if ((Integer)right < 0) {
-              return new BigDecimal(1).divide(new BigDecimal((Integer)left).pow(Math.abs((Integer)right)));
-            }
-            return new BigDecimal((Integer)left).pow((Integer)right).intValue();
-        }
-
-        if (left instanceof BigDecimal) {
-            return new BigDecimal(Math.pow((((BigDecimal)left).doubleValue()), ((BigDecimal)right).doubleValue()));
-        }
-
-        throw new IllegalArgumentException(String.format("Cannot %s arguments of type '%s' and '%s'.", this.getClass().getSimpleName(), left.getClass().getName(), right.getClass().getName()));
+        return Execution.resolveArithmeticDoOperation(this, left, right);
     }
 }

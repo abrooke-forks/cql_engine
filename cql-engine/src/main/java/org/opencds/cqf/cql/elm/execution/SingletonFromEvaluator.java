@@ -18,16 +18,10 @@ If the source list is null, the result is null.
 public class SingletonFromEvaluator extends org.cqframework.cql.elm.execution.SingletonFrom {
 
     @Override
-    public Object evaluate(Context context) {
-        Object value = getOperand().evaluate(context);
-
-        if (value == null) {
-            return null;
-        }
-
+    public Object doOperation(Iterable<Object> operand) {
         Object result = null;
         boolean first = true;
-        for (Object element : (Iterable)value) {
+        for (Object element : operand) {
             if (first) {
                 result = element;
                 first = false;
@@ -37,5 +31,14 @@ public class SingletonFromEvaluator extends org.cqframework.cql.elm.execution.Si
             }
         }
         return result;
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = getOperand().evaluate(context);
+
+        if (operand == null) { return null; }
+
+        return Execution.resolveListDoOperation(this, operand);
     }
 }

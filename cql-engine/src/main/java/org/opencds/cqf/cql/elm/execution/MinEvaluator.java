@@ -21,33 +21,35 @@ If the source is null, the result is null.
 */
 public class MinEvaluator extends org.cqframework.cql.elm.execution.Min {
 
-  public static Object min(Object source) {
-    if (source instanceof Iterable) {
-      Iterable<Object> element = (Iterable<Object>)source;
-      Iterator<Object> itr = element.iterator();
+  @Override
+  public Object doOperation(Iterable<Object> operand) {
+    Iterator<Object> itr = operand.iterator();
 
-      if (!itr.hasNext()) { return null; } // empty list
-      Object min = itr.next();
-      while (min == null && itr.hasNext()) { min = itr.next(); }
-      while (itr.hasNext()) {
-        Object value = itr.next();
+    if (!itr.hasNext()) { return null; } // empty list
 
-        if (value == null) { continue; } // skip null
-
-        if ((Boolean)LessEvaluator.less(value, min)) { min = value; }
-
-      }
-      return min;
+    Object min = itr.next();
+    while (min == null && itr.hasNext()) {
+      min = itr.next();
     }
-    throw new IllegalArgumentException(String.format("Cannot Min arguments of type '%s'.", source.getClass().getName()));
+    while (itr.hasNext()) {
+      Object value = itr.next();
+
+      if (value == null) { continue; } // skip null
+
+      if ((Boolean) Execution.resolveComparisonDoOperation(new LessEvaluator(), value, min)) {
+        min = value;
+      }
+
+    }
+    return min;
   }
 
   @Override
   public Object evaluate(Context context) {
+    Object operand = getSource().evaluate(context);
 
-    Object source = getSource().evaluate(context);
-    if (source == null) { return null; }
+    if ((Boolean) new IsNullEvaluator().doOperation((Iterable<Object>) operand)) { return null; }
 
-    return min(source);
+    return Execution.resolveListDoOperation(this, operand);
   }
 }

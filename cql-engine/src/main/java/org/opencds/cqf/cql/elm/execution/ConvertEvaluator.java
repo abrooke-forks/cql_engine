@@ -1,7 +1,9 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.cql.execution.Context;
+import org.opencds.cqf.cql.runtime.*;
+
+import java.math.BigDecimal;
 
 /*
 convert to<T>(argument Any) T
@@ -38,6 +40,17 @@ For specific semantics for each conversion, refer to the explicit conversion ope
  */
 public class ConvertEvaluator extends org.cqframework.cql.elm.execution.Convert {
 
+  // NOTE: This class is rarely called. From what I have observed, the ToXXX operators take precedence.
+
+  private Class type;
+  public void setType(Class type) {
+    this.type = type;
+  }
+  public ConvertEvaluator withType(Class type) {
+    setType(type);
+    return this;
+  }
+
   private Class resolveType(Context context) {
     if (this.getToTypeSpecifier() != null) {
       return context.resolveType(this.getToTypeSpecifier());
@@ -45,24 +58,69 @@ public class ConvertEvaluator extends org.cqframework.cql.elm.execution.Convert 
     return context.resolveType(this.getToType());
   }
 
-  @Override
-  public Object evaluate(Context context) {
-
-    Object operand = getOperand().evaluate(context);
-    if (operand == null) { return null; }
-
-    Class type = resolveType(context);
-
+  private Object convert(Object operand) {
     try {
       if (type.isInstance(operand)) {
         Class cls = operand.getClass();
         return cls.newInstance();
       }
-    } catch (InstantiationException e) {
-      e.printStackTrace();
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
     }
-    throw new IllegalArgumentException(String.format("Cannot Convert a value of type %s as %s.", operand.getClass().getName(), type.getName()));
+    catch (InstantiationException | IllegalAccessException ignored) { }
+    throw new IllegalArgumentException("Could not convert " + type.getSimpleName() + " to " + operand.getClass().getSimpleName());
+  }
+
+  @Override
+  public Object doOperation(Boolean operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object doOperation(BigDecimal operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object doOperation(Code operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object doOperation(Concept operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object doOperation(DateTime operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object doOperation(Integer operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object doOperation(Quantity operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object doOperation(String operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object doOperation(Time operand) {
+    return convert(operand);
+  }
+
+  @Override
+  public Object evaluate(Context context) {
+    Object operand = getOperand().evaluate(context);
+    type = resolveType(context);
+
+    if (operand == null) { return null; }
+
+    return Execution.resolveTypeDoOperation(this, operand);
   }
 }

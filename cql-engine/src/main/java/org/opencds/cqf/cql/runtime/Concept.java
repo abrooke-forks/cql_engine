@@ -1,7 +1,8 @@
 package org.opencds.cqf.cql.runtime;
 
-import org.cqframework.cql.elm.execution.In;
+import org.opencds.cqf.cql.elm.execution.Execution;
 import org.opencds.cqf.cql.elm.execution.InEvaluator;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class Concept {
         if (other instanceof Concept) {
             Concept otherConcept = (Concept)other;
             for (Code code : this.getCodes()) {
-                if (!InEvaluator.in(code, otherConcept.getCodes())) {
+                if (!(Boolean) Execution.resolveSharedDoOperation(new InEvaluator(), code, otherConcept.getCodes())) {
                     return false;
                 }
             }

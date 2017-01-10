@@ -2,8 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Value;
-import java.util.ArrayList;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -33,35 +31,31 @@ Note that the order of elements does not matter for the purposes of determining 
 public class ProperlyIncludesEvaluator extends org.cqframework.cql.elm.execution.ProperIncludes {
 
   @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    Object leftStart = leftOperand.getStart();
+    Object leftEnd = leftOperand.getEnd();
+    Object rightStart = rightOperand.getStart();
+    Object rightEnd = rightOperand.getEnd();
+
+    return ((Boolean) Execution.resolveComparisonDoOperation(new GreaterEvaluator(), Interval.getSize(leftStart, leftEnd), Interval.getSize(rightStart, rightEnd))
+            && (Boolean) Execution.resolveComparisonDoOperation(new LessOrEqualEvaluator(), leftStart, rightStart)
+            && (Boolean) Execution.resolveComparisonDoOperation(new GreaterOrEqualEvaluator(), leftEnd, rightEnd));
+  }
+
+  @Override
+  public Object doOperation(Iterable<Object> leftOperand, Iterable<Object> rightOperand) {
+    return (Boolean) new IncludesEvaluator().doOperation(leftOperand, rightOperand)
+                    && leftOperand.spliterator().getExactSizeIfKnown() >
+                            rightOperand.spliterator().getExactSizeIfKnown();
+  }
+
+  @Override
   public Object evaluate(Context context) {
-    Object operand1 = getOperand().get(0).evaluate(context);
-    Object operand2 = getOperand().get(1).evaluate(context);
+    Object left = getOperand().get(0).evaluate(context);
+    Object right = getOperand().get(1).evaluate(context);
 
-    if (operand1 == null || operand2 == null) { return null; }
+    if (left == null || right == null) { return null; }
 
-    if (operand1 instanceof Interval) {
-      Interval left = (Interval)operand1;
-      Interval right = (Interval)operand2;
-
-      if (left != null && right != null) {
-        Object leftStart = left.getStart();
-        Object leftEnd = left.getEnd();
-        Object rightStart = right.getStart();
-        Object rightEnd = right.getEnd();
-
-        return (Value.compareTo(Interval.getSize(leftStart, leftEnd), Interval.getSize(rightStart, rightEnd), ">")
-                && Value.compareTo(leftStart, rightStart, "<=") && Value.compareTo(leftEnd, rightEnd, ">="));
-      }
-      return null;
-    }
-
-    else if (operand1 instanceof Iterable) {
-      ArrayList<Object> left = (ArrayList<Object>)operand1;
-      ArrayList<Object> right = (ArrayList<Object>)operand2;
-
-      return (Boolean)IncludesEvaluator.includes(left, right) && left.size() > right.size();
-    }
-
-    throw new IllegalArgumentException(String.format("Cannot ProperlyIncludes arguments of type: %s", operand1.getClass().getName()));
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

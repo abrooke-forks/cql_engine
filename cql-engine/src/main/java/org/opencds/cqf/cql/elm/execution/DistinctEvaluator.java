@@ -20,10 +20,11 @@ If the argument is null, the result is null.
  */
 public class DistinctEvaluator extends org.cqframework.cql.elm.execution.Distinct {
 
-    public static List<Object> distinct(Iterable<Object> source) {
+    @Override
+    public Object doOperation(Iterable<Object> operand) {
         List<Object> result = new ArrayList<>();
-        for (Object element : source) {
-            if (!InEvaluator.in(element, result)) {
+        for (Object element : operand) {
+            if (!(Boolean) Execution.resolveSharedDoOperation(new InEvaluator(), element, result)) {
                 result.add(element);
             }
         }
@@ -32,7 +33,10 @@ public class DistinctEvaluator extends org.cqframework.cql.elm.execution.Distinc
 
     @Override
     public Object evaluate(Context context) {
-        Object value = this.getOperand().evaluate(context);
-        return distinct((Iterable<Object>)value);
+        Object operand = this.getOperand().evaluate(context);
+
+        if (operand == null) { return null; }
+
+        return Execution.resolveListDoOperation(this, operand);
     }
 }

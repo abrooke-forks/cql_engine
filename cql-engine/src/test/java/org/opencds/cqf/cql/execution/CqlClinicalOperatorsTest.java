@@ -1,12 +1,17 @@
 package org.opencds.cqf.cql.execution;
 
-import org.testng.annotations.Test;
+import org.joda.time.*;
 import org.opencds.cqf.cql.elm.execution.CalculateAgeAtEvaluator;
+import org.opencds.cqf.cql.elm.execution.CalculateAgeEvaluator;
+import org.opencds.cqf.cql.elm.execution.DurationBetweenEvaluator;
+import org.opencds.cqf.cql.elm.execution.Execution;
 import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.runtime.Uncertainty;
-import org.joda.time.Partial;
+import org.testng.annotations.Test;
+
 import javax.xml.bind.JAXBException;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -15,9 +20,8 @@ public class CqlClinicalOperatorsTest extends CqlExecutionTestBase {
 
     @Test
     public void testAge() throws JAXBException {
-      Context context = new Context(library);
-      // Object result = context.resolveExpressionRef("AgeYears").getExpression().evaluate(context);
-      // assertThat(result, is(2));
+        Context context = new Context(library);
+        Object result;
     }
 
     @Test
@@ -32,29 +36,41 @@ public class CqlClinicalOperatorsTest extends CqlExecutionTestBase {
     @Test
     public void testCalculateAge() throws JAXBException {
         Context context = new Context(library);
+
+        LocalDate today = LocalDate.now();
+        LocalDate birthday = new LocalDate(2000, 1, 1);
+        Years years = Years.yearsBetween(birthday, today);
+        Months months = Months.monthsBetween(birthday, today);
+        Days days = Days.daysBetween(birthday, today);
+        Hours hours = Hours.hoursBetween(birthday, today);
+        Minutes minutes = Minutes.minutesBetween(birthday, today);
+        Seconds seconds = Seconds.secondsBetween(birthday, today);
+
         // TODO: fix this -- translation error
-        // Object result = context.resolveExpressionRef("CalculateAgeYears").getExpression().evaluate(context);
-        // assertThat(result, is(16));
+//         Object result = context.resolveExpressionRef("CalculateAgeYears").getExpression().evaluate(context);
+//         assertThat(result, is(years.get(DurationFieldType.years())));
 
         Object result = context.resolveExpressionRef("CalculateAgeMonths").getExpression().evaluate(context);
-        assertThat(result, is((Integer)CalculateAgeAtEvaluator.calculateAgeAt(new DateTime().withPartial(new Partial(DateTime.getFields(3), new int[] {2000, 1, 1})), DateTime.getToday(), "month")));
+        assertThat(result, is(months.get(DurationFieldType.months())));
 
         result = context.resolveExpressionRef("CalculateAgeDays").getExpression().evaluate(context);
-        assertThat(result, is((Integer)CalculateAgeAtEvaluator.calculateAgeAt(new DateTime().withPartial(new Partial(DateTime.getFields(3), new int[] {2000, 1, 1})), DateTime.getToday(), "day")));
+        assertThat(result, is(days.get(DurationFieldType.days())));
 
         result = context.resolveExpressionRef("CalculateAgeHours").getExpression().evaluate(context);
-        assertThat(result, is((Integer)CalculateAgeAtEvaluator.calculateAgeAt(new DateTime().withPartial(new Partial(DateTime.getFields(4), new int[] {2000, 1, 1, 0})), DateTime.getToday(), "hour")));
+        assertThat(result, is(hours.get(DurationFieldType.hours())));
 
         result = context.resolveExpressionRef("CalculateAgeMinutes").getExpression().evaluate(context);
-        assertThat(result, is((Integer)CalculateAgeAtEvaluator.calculateAgeAt(new DateTime().withPartial(new Partial(DateTime.getFields(5), new int[] {2000, 1, 1, 0, 0})), DateTime.getToday(), "minute")));
+        assertThat(result, is(minutes.get(DurationFieldType.minutes())));
 
         result = context.resolveExpressionRef("CalculateAgeSeconds").getExpression().evaluate(context);
-        assertThat(result, is((Integer)CalculateAgeAtEvaluator.calculateAgeAt(new DateTime().withPartial(new Partial(DateTime.getFields(6), new int[] {2000, 1, 1, 0, 0, 0})), DateTime.getToday(), "second")));
+        assertThat(result, is(seconds.get(DurationFieldType.seconds())));
 
         result = context.resolveExpressionRef("CalculateAgeUncertain").getExpression().evaluate(context);
-        Integer low = (Integer)CalculateAgeAtEvaluator.calculateAgeAt(new DateTime().withPartial(new Partial(DateTime.getFields(2), new int[] {2000, 12})), DateTime.getToday(), "month");
-        Integer high = (Integer)CalculateAgeAtEvaluator.calculateAgeAt(new DateTime().withPartial(new Partial(DateTime.getFields(2), new int[] {2000, 1})), DateTime.getToday(), "month");
-        assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(low, true, high, true)));
+        Integer low = (Integer) Execution.resolveDateTimeDoOperation(new DurationBetweenEvaluator().withPrecision("month"),
+                new DateTime().withPartial(new Partial(DateTime.getFields(2), new int[] {2000, 12})), DateTime.getToday());
+        Integer high = (Integer) Execution.resolveDateTimeDoOperation(new DurationBetweenEvaluator().withPrecision("month"),
+                new DateTime().withPartial(new Partial(DateTime.getFields(2), new int[] {2000, 1})), DateTime.getToday());
+        assertThat(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(low, true, high, true)), is(true));
     }
 
     /**
@@ -82,7 +98,7 @@ public class CqlClinicalOperatorsTest extends CqlExecutionTestBase {
         assertThat(result, is(521683200));
 
         result = context.resolveExpressionRef("CalculateAgeAtUncertain").getExpression().evaluate(context);
-        assertThat(((Uncertainty)result).getUncertaintyInterval(), is(new Interval(187, true, 198, true)));
+        assertThat(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(187, true, 198, true)), is(true));
     }
 
     /**
@@ -134,18 +150,17 @@ public class CqlClinicalOperatorsTest extends CqlExecutionTestBase {
         result = context.resolveExpressionRef("ConceptEquivalentNull").getExpression().evaluate(context);
         assertThat(result, is(false));
 
-        // TODO: Fix these -- figure out if Codes are allowed null components
-        // result = context.resolveExpressionRef("CodeEquivalentNullTrue").getExpression().evaluate(context);
-        // assertThat(result, is(true));
-        //
-        // result = context.resolveExpressionRef("CodeEquivalentNullFalse").getExpression().evaluate(context);
-        // assertThat(result, is(false));
-        //
-        // result = context.resolveExpressionRef("ConceptEquivalentNullTrue").getExpression().evaluate(context);
-        // assertThat(result, is(true));
-        //
-        // result = context.resolveExpressionRef("ConceptEquivalentNullFalse").getExpression().evaluate(context);
-        // assertThat(result, is(false));
+        result = context.resolveExpressionRef("CodeEquivalentNullTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("CodeEquivalentNullFalse").getExpression().evaluate(context);
+        assertThat(result, is(false));
+
+        result = context.resolveExpressionRef("ConceptEquivalentNullTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("ConceptEquivalentNullFalse").getExpression().evaluate(context);
+        assertThat(result, is(false));
     }
 
     /**

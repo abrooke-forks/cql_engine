@@ -1,12 +1,8 @@
 package org.opencds.cqf.cql.elm.execution;
 
+import org.cqframework.cql.elm.execution.DateTimePrecision;
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Value;
-import org.opencds.cqf.cql.runtime.Time;
-import org.opencds.cqf.cql.runtime.DateTime;
-import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Uncertainty;
-import java.util.ArrayList;
+import org.opencds.cqf.cql.runtime.*;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -39,97 +35,83 @@ If either or both arguments are null, the result is null.
 public class AfterEvaluator extends org.cqframework.cql.elm.execution.After {
 
   @Override
+  public void setPrecision(DateTimePrecision value) {
+    super.setPrecision(value);
+  }
+
+  public AfterEvaluator withPrecision(DateTimePrecision value) {
+    setPrecision(value);
+    return this;
+  }
+
+  @Override
+  public Object doOperation(Interval leftOperand, Interval rightOperand) {
+    return Execution.resolveComparisonDoOperation(new GreaterEvaluator(), leftOperand.getStart(), rightOperand.getEnd());
+  }
+
+  @Override
+  public Object doOperation(Interval leftOperand, Object rightOperand) {
+    return Execution.resolveComparisonDoOperation(new GreaterEvaluator(), leftOperand.getStart(), rightOperand);
+  }
+
+  @Override
+  public Object doOperation(Object leftOperand, Interval rightOperand) {
+    return Execution.resolveComparisonDoOperation(new GreaterEvaluator(), leftOperand, rightOperand.getEnd());
+  }
+
+  @Override
+  public Object doOperation(DateTime leftOperand, DateTime rightOperand) {
+    int idx = DateTime.getFieldIndex(precision.value());
+
+    if (idx != -1) {
+      if (idx + 1 > leftOperand.getPartial().size() || idx + 1 > rightOperand.getPartial().size()) {
+        if (Uncertainty.isUncertain(leftOperand, precision.value())) {
+          return Execution.resolveComparisonDoOperation(new GreaterEvaluator(),
+                  Uncertainty.getHighLowList(leftOperand, precision.value()).get(0), rightOperand);
+        }
+
+        else if (Uncertainty.isUncertain(rightOperand, precision.value())) {
+          return Execution.resolveComparisonDoOperation(new GreaterEvaluator(),
+                  leftOperand, Uncertainty.getHighLowList(rightOperand, precision.value()).get(1));
+        }
+        return null;
+      }
+      return leftOperand.getPartial().getValue(idx) > rightOperand.getPartial().getValue(idx);
+    }
+
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision.value()));
+  }
+
+  @Override
+  public Object doOperation(Time leftOperand, Time rightOperand) {
+    int idx = Time.getFieldIndex(precision.value());
+
+    if (idx != -1) {
+      if (idx + 1 > leftOperand.getPartial().size() || idx + 1 > rightOperand.getPartial().size()) {
+        if (Uncertainty.isUncertain(leftOperand, precision.value())) {
+          return Execution.resolveComparisonDoOperation(new GreaterEvaluator(),
+                  Uncertainty.getHighLowList(leftOperand, precision.value()).get(0), rightOperand);
+        }
+
+        else if (Uncertainty.isUncertain(rightOperand, precision.value())) {
+          return Execution.resolveComparisonDoOperation(new GreaterEvaluator(),
+                  leftOperand, Uncertainty.getHighLowList(rightOperand, precision.value()).get(1));
+        }
+        return null;
+      }
+      return leftOperand.getPartial().getValue(idx) > rightOperand.getPartial().getValue(idx);
+    }
+
+    throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision.value()));
+  }
+
+  @Override
   public Object evaluate(Context context) {
-    Object testLeft = getOperand().get(0).evaluate(context);
-    Object testRight = getOperand().get(1).evaluate(context);
+    Object left = getOperand().get(0).evaluate(context);
+    Object right = getOperand().get(1).evaluate(context);
 
-    if (testLeft == null || testRight == null) { return null; }
+    if (left == null || right == null) { return null; }
 
-    // (Interval, Interval)
-    if (testLeft instanceof Interval && testRight instanceof Interval) {
-      return Value.compareTo(((Interval)testLeft).getStart(), ((Interval)testRight).getEnd(), ">");
-    }
-
-    // (Interval, Point)
-    else if (testLeft instanceof Interval && !(testRight instanceof Interval)) {
-      return Value.compareTo(((Interval)testLeft).getStart(), testRight, ">");
-    }
-
-    // (Point, Interval)
-    else if (!(testLeft instanceof Interval) && testRight instanceof Interval) {
-      return Value.compareTo(testLeft, ((Interval)testRight).getEnd(), ">");
-    }
-
-    // (DateTime, DateTime)
-    else if (testLeft instanceof DateTime && testRight instanceof DateTime) {
-      DateTime leftDT = (DateTime)testLeft;
-      DateTime rightDT = (DateTime)testRight;
-      String precision = getPrecision() == null ? null : getPrecision().value();
-
-      if (precision == null) {
-        throw new IllegalArgumentException("Precision must be specified.");
-      }
-
-      int idx = DateTime.getFieldIndex(precision);
-
-      if (idx != -1) {
-        // check level of precision
-        if (idx + 1 > leftDT.getPartial().size() || idx + 1 > rightDT.getPartial().size()) {
-
-          // Uncertainty
-          if (Uncertainty.isUncertain(leftDT, precision)) {
-            return GreaterEvaluator.greater(Uncertainty.getHighLowList(leftDT, precision).get(0), rightDT);
-          }
-
-          else if (Uncertainty.isUncertain(rightDT, precision)) {
-            return GreaterEvaluator.greater(leftDT, Uncertainty.getHighLowList(rightDT, precision).get(1));
-          }
-          return null;
-        }
-        return leftDT.getPartial().getValue(idx) > rightDT.getPartial().getValue(idx);
-      }
-
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-      }
-    }
-
-    // (Time, Time)
-    else if (testLeft instanceof Time && testRight instanceof Time) {
-      Time leftT = (Time)testLeft;
-      Time rightT = (Time)testRight;
-      String precision = getPrecision() == null ? null : getPrecision().value();
-
-      if (precision == null) {
-        throw new IllegalArgumentException("Precision must be specified.");
-      }
-
-      int idx = Time.getFieldIndex(precision);
-
-      if (idx != -1) {
-        // check level of precision
-        if (idx + 1 > leftT.getPartial().size() || idx + 1 > rightT.getPartial().size()) {
-
-          // Uncertainty
-          if (Uncertainty.isUncertain(leftT, precision)) {
-            return GreaterEvaluator.greater(Uncertainty.getHighLowList(leftT, precision).get(0), rightT);
-          }
-
-          else if (Uncertainty.isUncertain(rightT, precision)) {
-            return GreaterEvaluator.greater(leftT, Uncertainty.getHighLowList(rightT, precision).get(1));
-          }
-
-          return null;
-        }
-
-        return leftT.getPartial().getValue(idx) > rightT.getPartial().getValue(idx);
-      }
-
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-      }
-    }
-
-    throw new IllegalArgumentException(String.format("Cannot After arguments of type '%s' and '%s'.", testLeft.getClass().getName(), testRight.getClass().getName()));
+    return Execution.resolveSharedDoOperation(this, left, right);
   }
 }

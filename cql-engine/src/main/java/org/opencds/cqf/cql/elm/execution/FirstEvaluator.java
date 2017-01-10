@@ -15,15 +15,20 @@ If the argument is null, the result is null.
 public class FirstEvaluator extends org.cqframework.cql.elm.execution.First {
 
     @Override
-    public Object evaluate(Context context) {
-        Object value = getSource().evaluate(context);
-
-        if (value == null) { return null; }
-
-        for (Object element : (Iterable)value) {
+    public Object doOperation(Iterable<Object> operand) {
+        for (Object element : (Iterable)operand) {
             return element;
         }
 
         return null;
+    }
+
+    @Override
+    public Object evaluate(Context context) {
+        Object operand = getSource().evaluate(context);
+
+        if (operand == null) { return null; }
+
+        return Execution.resolveListDoOperation(this, operand);
     }
 }

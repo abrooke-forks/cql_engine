@@ -41,104 +41,42 @@ public class SubtractEvaluator extends org.cqframework.cql.elm.execution.Subtrac
 
   private static final int YEAR_RANGE_MIN = 0001;
 
-  public static Object subtract(Object left, Object right) {
-    if (left == null || right == null) {
-        return null;
-    }
+  @Override
+  public Object doOperation(Integer leftOperand, Integer rightOperand) {
+    return leftOperand - rightOperand;
+  }
 
-    // -(Integer, Integer)
-    if (left instanceof Integer) {
-        return (Integer)left - (Integer)right;
-    }
+  @Override
+  public Object doOperation(BigDecimal leftOperand, BigDecimal rightOperand) {
+    return leftOperand.subtract(rightOperand);
+  }
 
-    // -(Decimal, Decimal)
-    else if (left instanceof BigDecimal) {
-        return ((BigDecimal)left).subtract((BigDecimal)right);
-    }
+  @Override
+  public Object doOperation(Quantity leftOperand, Quantity rightOperand) {
+    return new Quantity().withValue(leftOperand.getValue().subtract(rightOperand.getValue())).withUnit(leftOperand.getUnit());
+  }
 
-    // -(Quantity, Quantity)
-    else if (left instanceof Quantity) {
-      return new Quantity().withValue((((Quantity)left).getValue()).subtract(((Quantity)right).getValue())).withUnit(((Quantity)left).getUnit());
-    }
+  @Override
+  public Object doOperation(DateTime leftOperand, Quantity rightOperand) {
+    return leftOperand.getPartial().getValue(0) < YEAR_RANGE_MIN ?
+            new ArithmeticException("The date time subtraction results in a year less than the accepted range.") :
+            new AddEvaluator().doOperation(leftOperand, rightOperand.withValue(rightOperand.getValue().negate()));
+  }
 
-    // -(DateTime, Quantity)
-    else if (left instanceof DateTime && right instanceof Quantity) {
-      DateTime dt = (DateTime)left;
-      DateTime ret = new DateTime().withPartial(dt.getPartial());
-      String unit = ((Quantity)right).getUnit();
-      int value = ((Quantity)right).getValue().intValue();
+  @Override
+  public Object doOperation(Time leftOperand, Quantity rightOperand) {
+    return new AddEvaluator().doOperation(leftOperand, rightOperand.withValue(rightOperand.getValue().negate()));
+  }
 
-      int idx = DateTime.getFieldIndex2(unit);
-
-      if (idx != -1) {
-        int startSize = ret.getPartial().size();
-        // check that the Partial has the precision specified
-        if (startSize < idx + 1) {
-          // expand the Partial to the proper precision
-          for (int i = startSize; i < idx + 1; ++i) {
-            ret.setPartial(ret.getPartial().with(DateTime.getField(i), DateTime.getField(i).getField(null).getMinimumValue()));
-          }
-        }
-
-        // do the subtraction
-        ret.setPartial(ret.getPartial().property(DateTime.getField(idx)).addToCopy(-value));
-        // truncate to original precision
-        for (int i = idx; i >= startSize; --i) {
-          ret.setPartial(ret.getPartial().without(DateTime.getField(i)));
-        }
-      }
-
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration unit: %s", unit));
-      }
-      if (ret.getPartial().getValue(0) < YEAR_RANGE_MIN) {
-        throw new ArithmeticException("The date time addition results in a year less than the accepted range.");
-      }
-
-      return ret;
-    }
-
-    else if (left instanceof Uncertainty && right instanceof Uncertainty) {
-      Interval leftInterval = ((Uncertainty)left).getUncertaintyInterval();
-      Interval rightInterval = ((Uncertainty)right).getUncertaintyInterval();
-      return new Uncertainty().withUncertaintyInterval(new Interval(subtract(leftInterval.getStart(), rightInterval.getStart()), true, subtract(leftInterval.getEnd(), rightInterval.getEnd()), true));
-    }
-
-    // -(Time, Quantity)
-    else if (left instanceof Time && right instanceof Quantity) {
-      Time t = (Time)left;
-      Time ret = new Time().withPartial(t.getPartial());
-      String unit = ((Quantity)right).getUnit();
-      int value = ((Quantity)right).getValue().intValue();
-
-      int idx = Time.getFieldIndex2(unit);
-
-      if (idx != -1) {
-        int startSize = ret.getPartial().size();
-        // check that the Partial has the precision specified
-        if (startSize < idx + 1) {
-          // expand the Partial to the proper precision
-          for (int i = startSize; i < idx + 1; ++i) {
-            ret.setPartial(ret.getPartial().with(Time.getField(i), Time.getField(i).getField(null).getMinimumValue()));
-          }
-        }
-
-        // do the subtraction
-        ret.setPartial(ret.getPartial().property(Time.getField(idx)).addToCopy(-value));
-        // truncate to original precision
-        for (int i = idx; i >= startSize; --i) {
-          ret.setPartial(ret.getPartial().without(Time.getField(i)));
-        }
-      }
-
-      else {
-        throw new IllegalArgumentException(String.format("Invalid duration unit: %s", unit));
-      }
-
-      return ret;
-    }
-
-    throw new IllegalArgumentException(String.format("Cannot Subtract arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
+  // NOTE: this operation signature is not specified in the spec.
+  // It is being used for uncertainty arithmetic
+  @Override
+  public Object doOperation(Uncertainty leftOperand, Uncertainty rightOperand) {
+    Interval leftInterval = leftOperand.getUncertaintyInterval();
+    Interval rightInterval = rightOperand.getUncertaintyInterval();
+    return new Uncertainty().withUncertaintyInterval(new Interval(
+            Execution.resolveSharedDoOperation(this, leftInterval.getStart(), rightInterval.getStart()), true,
+            Execution.resolveSharedDoOperation(this, leftInterval.getEnd(), rightInterval.getEnd()), true));
   }
 
     @Override
@@ -146,6 +84,8 @@ public class SubtractEvaluator extends org.cqframework.cql.elm.execution.Subtrac
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 
-        return subtract(left, right);
+        if (left == null || right == null) { return null; }
+
+        return Execution.resolveSharedDoOperation(this, left, right);
     }
 }

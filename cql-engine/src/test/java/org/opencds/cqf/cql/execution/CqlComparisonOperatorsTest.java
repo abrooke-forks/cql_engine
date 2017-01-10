@@ -3,6 +3,7 @@ package org.opencds.cqf.cql.execution;
 import org.testng.annotations.Test;
 import javax.xml.bind.JAXBException;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.comparesEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -10,9 +11,48 @@ public class CqlComparisonOperatorsTest extends CqlExecutionTestBase {
 
     @Test
     public void testBetween() throws JAXBException {
-      Context context = new Context(library);
-      Object result = context.resolveExpressionRef("BetweenIntTrue").getExpression().evaluate(context);
-      assertThat(result, is(true));
+        Context context = new Context(library);
+        Object result = context.resolveExpressionRef("BetweenIntTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("BetweenIntFalse").getExpression().evaluate(context);
+        assertThat(result, is(false));
+
+        result = context.resolveExpressionRef("BetweenDecimalTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("BetweenDecimalTrue2").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("BetweenQuantityTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("BetweenQuantityFalse").getExpression().evaluate(context);
+        assertThat(result, is(false));
+
+        result = context.resolveExpressionRef("BetweenDateTimeTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("BetweenDateTimeTrue2").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("BetweenDateTimeFalse").getExpression().evaluate(context);
+        assertThat(result, is(false));
+
+        result = context.resolveExpressionRef("BetweenDateTimeNull").getExpression().evaluate(context);
+        assertThat(result, is(nullValue()));
+
+        result = context.resolveExpressionRef("BetweenTimeTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("BetweenTimeFalse").getExpression().evaluate(context);
+        assertThat(result, is(false));
+
+        result = context.resolveExpressionRef("BetweenStringTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
+
+        result = context.resolveExpressionRef("BetweenStringFalse").getExpression().evaluate(context);
+        assertThat(result, is(false));
     }
 
     /**
@@ -88,8 +128,8 @@ public class CqlComparisonOperatorsTest extends CqlExecutionTestBase {
         result = context.resolveExpressionRef("TupleEqDateTimeFalse").getExpression().evaluate(context);
         assertThat(result, is(false));
 
-        result = context.resolveExpressionRef("TupleEqDateTimeNull").getExpression().evaluate(context);
-        assertThat(result, is(nullValue()));
+        result = context.resolveExpressionRef("TupleEqDateTimeTrue2").getExpression().evaluate(context);
+        assertThat(result, is(true));
 
         result = context.resolveExpressionRef("TupleEqTimeTrue").getExpression().evaluate(context);
         assertThat(result, is(true));
@@ -130,13 +170,10 @@ public class CqlComparisonOperatorsTest extends CqlExecutionTestBase {
         result = context.resolveExpressionRef("DateTimeEqJanJuly").getExpression().evaluate(context);
         assertThat(result, is(false));
 
-        result = context.resolveExpressionRef("DateTimeEqMissingArg").getExpression().evaluate(context);
-        assertThat(result, is(nullValue()));
+        result = context.resolveExpressionRef("DateTimeEqTrue").getExpression().evaluate(context);
+        assertThat(result, is(true));
 
         result = context.resolveExpressionRef("DateTimeEqNull").getExpression().evaluate(context);
-        assertThat(result, is(nullValue()));
-
-        result = context.resolveExpressionRef("DateTimeEqNull2").getExpression().evaluate(context);
         assertThat(result, is(nullValue()));
 
         result = context.resolveExpressionRef("DateTimeUTC").getExpression().evaluate(context);
