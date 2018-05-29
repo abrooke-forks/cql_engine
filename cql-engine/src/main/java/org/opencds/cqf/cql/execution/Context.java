@@ -1,5 +1,6 @@
 package org.opencds.cqf.cql.execution;
 
+import org.apache.commons.collections.map.LRUMap;
 import org.cqframework.cql.elm.execution.*;
 import org.opencds.cqf.cql.data.DataProvider;
 import org.opencds.cqf.cql.data.ExternalFunctionProvider;
@@ -15,12 +16,31 @@ import java.util.List;
  */
 public class Context {
 
+    // caching logic
     private boolean enableExpressionCache = false;
-    private LinkedHashMap expressions = new LinkedHashMap(15, 0.9f, true) {
-        protected boolean removeEldestEntry(Map.Entry eldest) {
-            return size() > 10;
-        }
-    };
+    // default LRUMap has max size of 100 elements
+    // this cache uses name mangling to create the key (currentContext + expressionName)
+    private LRUMap expressionCache = new LRUMap();
+    public org.opencds.cqf.cql.runtime.DateTime getEvaluationDateTime() {
+        return this.evaluationDateTime;
+    }
+
+    public void setExpressionCaching(boolean yayOrNay) {
+        this.enableExpressionCache = yayOrNay;
+    }
+    public boolean isExpressionInCache(String name) {
+        return this.expressionCache.containsKey(getCurrentContext() + name);
+    }
+    public boolean isExpressionCachingEnabled() {
+        return this.enableExpressionCache;
+    }
+    public void addExpressionToCache(String name, Object result) {
+        this.expressionCache.put(getCurrentContext() + name, result);
+    }
+    public Object getExpressionResultFromCache(String name) {
+        return this.expressionCache.get(getCurrentContext() + name);
+    }
+    // end caching logic
 
     private Map<String, Object> parameters = new HashMap<>();
     private Stack<String> currentContext = new Stack<>();
@@ -102,30 +122,6 @@ public class Context {
     public Context setEnableTraceLogging(boolean enableTraceLogging) {
         this.enableTraceLogging = enableTraceLogging;
         return this;
-    }
-
-    public org.opencds.cqf.cql.runtime.DateTime getEvaluationDateTime() {
-        return this.evaluationDateTime;
-    }
-
-    public void setExpressionCaching(boolean yayOrNay) {
-        this.enableExpressionCache = yayOrNay;
-    }
-
-    public boolean isExpressionInCache(String name) {
-        return this.expressions.containsKey(name);
-    }
-
-    public boolean isExpressionCachingEnabled() {
-        return this.enableExpressionCache;
-    }
-
-    public void addExpressionToCache(String name, Object result) {
-        this.expressions.put(name, result);
-    }
-
-    public Object getExpressionResultFromCache(String name) {
-        return this.expressions.get(name);
     }
 
     public void addLetExpression(String name, Expression result) {
