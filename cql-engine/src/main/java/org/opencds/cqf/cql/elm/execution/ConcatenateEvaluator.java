@@ -9,9 +9,6 @@ The concatenate (+) operator performs string concatenation of its arguments.
 If either argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class ConcatenateEvaluator extends org.cqframework.cql.elm.execution.Concatenate {
 
     public static Object concatenate(Object left, Object right) {

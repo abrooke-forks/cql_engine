@@ -4,9 +4,6 @@ import org.cqframework.cql.elm.execution.*;
 
 import javax.xml.bind.annotation.XmlRegistry;
 
-/**
- * Created by Bryn on 5/24/2016.
- */
 @XmlRegistry
 public class ObjectFactoryEx extends org.cqframework.cql.elm.execution.ObjectFactory {
     @Override
@@ -422,6 +419,9 @@ public class ObjectFactoryEx extends org.cqframework.cql.elm.execution.ObjectFac
 
     @Override
     public Time createTime() { return new TimeEvaluator(); }
+
+    @Override
+    public TimeFrom createTimeFrom() { return new TimeFromEvaluator(); }
 
     @Override
     public TimeOfDay createTimeOfDay() { return new TimeOfDayEvaluator(); }

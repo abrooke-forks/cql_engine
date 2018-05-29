@@ -27,9 +27,6 @@ end
 
 */
 
-/**
- *   Created by Chris Schuler on 9/25/2016
- */
 public class CaseEvaluator extends org.cqframework.cql.elm.execution.Case {
 
     public Object selectedCase(Context context, Object comparand) {

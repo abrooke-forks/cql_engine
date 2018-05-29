@@ -1,8 +1,6 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Quantity;
-import java.math.BigDecimal;
 
 /*
 is<T>(argument Any) Boolean
@@ -12,9 +10,6 @@ If the run-time type of the argument is of the type being tested, the result of 
   otherwise, the result is false.
 */
 
-/**
-* Created by Chris Schuler on 6/14/2016
-*/
 public class IsEvaluator extends org.cqframework.cql.elm.execution.Is {
 
     public static Object is(Class type, Object operand) {

@@ -16,9 +16,6 @@ import org.opencds.cqf.cql.execution.tests.Tests;
 
 import org.testng.annotations.Test;
 
-/**
- * Created by Darren on 2018 Jan 16.
- */
 public class TestCqlExprsAndLibs {
 
     private static void runTestNode(TestDefinition test) {
@@ -157,7 +154,7 @@ public class TestCqlExprsAndLibs {
         }
     }
 
-    @Test
+    //@Test
     public void testCqlExprsAndLibs() {
         TestCollection testCollection = new TestCollection();
         // Gather Test cases from org/opencds/cqf/cql/execution/[TestIsolatedCqlExprs|TestHolisticCqlLibs]/tests/*.xml

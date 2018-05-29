@@ -27,9 +27,6 @@ import java.util.List;
 * If the number is null, or 0 or less, the result is an empty list.
 * */
 
-/**
- * Created by Christopher Schuler on 6/13/2017.
- */
 public class SliceEvaluator extends org.cqframework.cql.elm.execution.Slice {
 
     public static Object slice(Object source, Integer start, Integer end) {

@@ -2,9 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 
-/**
- *   Created by Chris Schuler on 9/25/2016
- */
 public class IfEvaluator extends org.cqframework.cql.elm.execution.If {
 
     @Override

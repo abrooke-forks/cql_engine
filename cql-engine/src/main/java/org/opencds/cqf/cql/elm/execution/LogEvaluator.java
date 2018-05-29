@@ -11,9 +11,6 @@ When invoked with Integer arguments, the arguments will be implicitly converted 
 If either argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class LogEvaluator extends org.cqframework.cql.elm.execution.Log {
 
     public static Object log(Object left, Object right) {

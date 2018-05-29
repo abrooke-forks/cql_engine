@@ -13,9 +13,6 @@ When invoked with mixed Integer and Decimal arguments, the Integer argument will
 If either argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class ModuloEvaluator extends org.cqframework.cql.elm.execution.Modulo {
 
     public static Object modulo(Object left, Object right) {

@@ -1,10 +1,6 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Interval;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -28,9 +24,6 @@ If either argument is null, the result is null.
 Note that the order of elements does not matter for the purposes of determining inclusion.
 */
 
-/**
- * Created by Chris Schuler on 6/8/2016
- */
 public class ProperlyIncludedInEvaluator extends org.cqframework.cql.elm.execution.ProperIncludedIn {
 
     public static Object properlyIncudedIn(Object left, Object right, String precision) {

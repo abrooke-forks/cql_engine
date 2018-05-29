@@ -26,9 +26,6 @@ If either argument is null, the result is null.
 Note that the union operator can also be invoked with the symbolic operator (|).
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class UnionEvaluator extends org.cqframework.cql.elm.execution.Union {
 
     public static Object union(Object left, Object right) {
@@ -48,8 +45,8 @@ public class UnionEvaluator extends org.cqframework.cql.elm.execution.Union {
                 return null;
             }
 
-            if (!OverlapsEvaluator.overlaps((Interval) left, (Interval) right)
-                    && !MeetsEvaluator.meets((Interval) left, (Interval) right))
+            if (!OverlapsEvaluator.overlaps(left, right, null)
+                    && !MeetsEvaluator.meets(left, right, null))
             {
                 return null;
             }

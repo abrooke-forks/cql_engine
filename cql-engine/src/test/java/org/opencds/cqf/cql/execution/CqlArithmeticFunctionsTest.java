@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.execution;
 
-import org.joda.time.Partial;
 import org.opencds.cqf.cql.runtime.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -40,7 +39,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Add#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.AddEvaluator#evaluate(Context)}
      */
     @Test
     public void testAdd() throws JAXBException {
@@ -63,7 +62,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Ceiling#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.CeilingEvaluator#evaluate(Context)}
      */
     @Test
     public void testCeiling() throws JAXBException {
@@ -91,7 +90,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Divide#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.DivideEvaluator#evaluate(Context)}
      */
     @Test
     public void testDivide() throws JAXBException {
@@ -136,7 +135,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Floor#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.FloorEvaluator#evaluate(Context)}
      */
     @Test
     public void testFloor() throws JAXBException {
@@ -167,7 +166,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Exp#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.ExpEvaluator#evaluate(Context)}
      */
     @Test
     public void testExp() throws JAXBException {
@@ -201,7 +200,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Log#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.LogEvaluator#evaluate(Context)}
      */
     @Test
     public void testLog() throws JAXBException {
@@ -231,7 +230,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Ln#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.LnEvaluator#evaluate(Context)}
      */
     @Test
     public void testLn() throws JAXBException {
@@ -267,7 +266,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Max#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.MaxEvaluator#evaluate(Context)}
      */
     @Test
     public void testMaximum() throws JAXBException {
@@ -281,14 +280,16 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
         // OBSOLETE: QuantityMaxValue
 
         result = context.resolveExpressionRef("DateTimeMaxValue").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {9999, 12, 31, 23, 59, 59, 999})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {9999, 12, 31, 23, 59, 59, 999})));
+        Assert.assertTrue(((DateTime)result).equal(new DateTime(9999, 12, 31, 23, 59, 59, 999, null)));
 
         result = context.resolveExpressionRef("TimeMaxValue").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {23, 59, 59, 999})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {23, 59, 59, 999})));
+        Assert.assertTrue(((Time) result).equal(new Time(23, 59, 59, 999, null)));
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Min#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.MinEvaluator#evaluate(Context)}
      */
     @Test
     public void testMinimum() throws JAXBException {
@@ -302,14 +303,16 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
         // OBSOLETE: QuantityMinValue
 
         result = context.resolveExpressionRef("DateTimeMinValue").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {0001, 1, 1, 0, 0, 0, 0})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {0001, 1, 1, 0, 0, 0, 0})));
+        Assert.assertTrue(((DateTime)result).equal(new DateTime(0001, 1, 1, 0, 0, 0, 0, null)));
 
         result = context.resolveExpressionRef("TimeMinValue").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {0, 0, 0, 0})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {0, 0, 0, 0})));
+        Assert.assertTrue(((Time) result).equal(new Time(0, 0, 0, 0, null)));
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Modulo#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.ModuloEvaluator#evaluate(Context)}
      */
     @Test
     public void testModulo() throws JAXBException {
@@ -340,7 +343,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Multiply#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.MultiplyEvaluator#evaluate(Context)}
      */
     @Test
     public void testMultiply() throws JAXBException {
@@ -364,7 +367,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Negate#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.NegateEvaluator#evaluate(Context)}
      */
     @Test
     public void testNegate() throws JAXBException {
@@ -404,7 +407,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Predecessor#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.PredecessorEvaluator#evaluate(Context)}
      */
     @Test
     public void testPredecessor() throws JAXBException {
@@ -431,10 +434,12 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
         Assert.assertEquals("cm", ((Quantity) result).getUnit());
 
         result = context.resolveExpressionRef("PredecessorOfJan12000").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {1999, 12, 31})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {1999, 12, 31})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(1999, 12, 31, null, null, null, null, null)));
 
         result = context.resolveExpressionRef("PredecessorOfNoon").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {11, 59, 59, 999})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {11, 59, 59, 999})));
+        Assert.assertTrue(((Time) result).equal(new Time(11, 59, 59, 999, null)));
 
         try {
          result = context.resolveExpressionRef("PredecessorUnderflowDt").getExpression().evaluate(context);
@@ -450,7 +455,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Power#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.PowerEvaluator#evaluate(Context)}
      */
     @Test
     public void testPower() throws JAXBException {
@@ -498,7 +503,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Round#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.RoundEvaluator#evaluate(Context)}
      */
     @Test
     public void testRound() throws JAXBException {
@@ -540,7 +545,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Subtract#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.SubtractEvaluator#evaluate(Context)}
      */
     @Test
     public void testSubtract() throws JAXBException {
@@ -565,7 +570,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Successor#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.SuccessorEvaluator#evaluate(Context)}
      */
     @Test
     public void testSuccessor() throws JAXBException {
@@ -588,10 +593,12 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
        assertThat(result, is(Value.successor(new BigDecimal("1.01"))));
 
        result = context.resolveExpressionRef("SuccessorOfJan12000").getExpression().evaluate(context);
-       assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2000, 1, 2})));
+//       assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2000, 1, 2})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(2000, 1, 2, null, null, null, null, null)));
 
        result = context.resolveExpressionRef("SuccessorOfNoon").getExpression().evaluate(context);
-       assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {12, 0, 0, 1})));
+//       assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {12, 0, 0, 1})));
+       Assert.assertTrue(((Time) result).equal(new Time(12, 0, 1, 1, null)));
 
        try {
          result = context.resolveExpressionRef("SuccessorOverflowDt").getExpression().evaluate(context);
@@ -607,7 +614,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.Truncate#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.TruncateEvaluator#evaluate(Context)}
      */
     @Test
     public void testTruncate() throws JAXBException {
@@ -652,7 +659,7 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     }
 
     /**
-     * {@link org.opencds.cqf.cql.elm.execution.TruncatedDivide#evaluate(Context)}
+     * {@link org.opencds.cqf.cql.elm.execution.TruncatedDivideEvaluator#evaluate(Context)}
      */
     @Test
     public void testTruncatedDivide() throws JAXBException {

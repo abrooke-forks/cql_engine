@@ -10,9 +10,6 @@ import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.List;
 
-/**
- * Created by Bryn on 4/12/2016.
- */
 public class Context {
 
     private boolean enableExpressionCache = false;
@@ -37,7 +34,7 @@ public class Context {
     private boolean enableTraceLogging = false;
 
     private org.opencds.cqf.cql.runtime.DateTime evaluationDateTime =
-            org.opencds.cqf.cql.runtime.DateTime.fromJavaDate(new Date(System.currentTimeMillis()));
+            org.opencds.cqf.cql.runtime.DateTime.now();
 
     public Context(Library library) {
         init(library);

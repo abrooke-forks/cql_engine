@@ -6,9 +6,6 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Date;
 
-/**
- * Created by Bryn on 4/15/2016.
- */
 public class Interval implements CqlType {
 
     public Interval(Object low, boolean lowClosed, Object high, boolean highClosed) {
@@ -35,7 +32,7 @@ public class Interval implements CqlType {
 
         // Special case for measure processing - MeasurementPeriod is a java date
         if (low instanceof Date && high instanceof Date) {
-            if (GreaterEvaluator.greater(DateTime.fromJavaDate((Date) getStart()), DateTime.fromJavaDate((Date) getEnd())))
+            if (((Date) low).compareTo((Date) high) > 0)
             {
                 throw new RuntimeException("Invalid Interval - the ending boundary must be greater than or equal to the starting boundary.");
             }
@@ -55,16 +52,11 @@ public class Interval implements CqlType {
             return SubtractEvaluator.subtract(end, start);
         }
 
-        else if (start instanceof DateTime) {
+        else if (start instanceof BaseTemporal && end instanceof BaseTemporal) {
+            String precision = Precision.getPrecisionFromFieldNoWeeks(((BaseTemporal) start).precision.getHighestPrecision(((BaseTemporal) end).precision)).getUnitFromPrecision();
             return new Quantity()
-                .withValue(new BigDecimal(DurationBetweenEvaluator.between(((DateTime)start).getJodaDateTime(), ((DateTime)end).getJodaDateTime(), ((DateTime)start).getPartial().size() - 1)))
-                .withUnit(DateTime.getUnit(((DateTime)start).getPartial().size() - 1));
-        }
-
-        else if (start instanceof Time) {
-            return new Quantity()
-                .withValue(new BigDecimal(DurationBetweenEvaluator.between(((Time)start).getJodaDateTime(), ((Time)end).getJodaDateTime(), ((Time)start).getPartial().size() + 2)))
-                .withUnit(Time.getUnit(((Time)start).getPartial().size() - 1));
+                .withValue(new BigDecimal((Integer) DurationBetweenEvaluator.durationBetween(start, end, precision)))
+                .withUnit(precision);
         }
 
         throw new IllegalArgumentException(String.format("Cannot getIntervalSize argument of type '%s'.", start.getClass().getName()));

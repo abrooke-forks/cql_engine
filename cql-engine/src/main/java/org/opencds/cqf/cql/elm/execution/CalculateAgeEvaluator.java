@@ -22,9 +22,6 @@ The CalculateAge operators are defined in terms of a DateTime duration calculati
     the result will be an uncertainty over the range of possible values, potentially causing some comparisons to return null.
 */
 
-/**
- * Created by Chris Schuler on 7/14/2016
- */
 public class CalculateAgeEvaluator extends org.cqframework.cql.elm.execution.CalculateAge {
 
     public static Object calculateAge(Object operand, String precision, DateTime today) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {

@@ -1,8 +1,5 @@
 package org.opencds.cqf.cql.execution;
 
-/**
- * Created by Darren on 2018 Mar 9.
- */
 public class TestDefinitionSourceMeta
 {
     public enum SourceKind { JAVA_RESOURCE, FILESYSTEM }

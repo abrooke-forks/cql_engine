@@ -4,8 +4,6 @@ import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.BaseTemporal;
 import org.opencds.cqf.cql.runtime.Interval;
 
-import javax.jws.Oneway;
-import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -30,9 +28,6 @@ If either argument is null, the result is null.
 Note that the order of elements does not matter for the purposes of determining inclusion.
 */
 
-/**
- * Created by Chris Schuler on 6/8/2016
- */
 public class ProperlyIncludesEvaluator extends org.cqframework.cql.elm.execution.ProperIncludes {
 
     public static Object properlyIncludes(Object left, Object right, String precision) {

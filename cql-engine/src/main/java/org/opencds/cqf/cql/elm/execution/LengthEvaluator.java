@@ -17,9 +17,6 @@ The Length operator returns the number of characters in a string.
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class LengthEvaluator extends org.cqframework.cql.elm.execution.Length {
 
     public static Object length(Object operand) {
@@ -52,7 +49,6 @@ public class LengthEvaluator extends org.cqframework.cql.elm.execution.Length {
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-
         return context.logTrace(this.getClass(), length(operand), operand);
     }
 }

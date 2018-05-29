@@ -2,9 +2,6 @@ package org.opencds.cqf.cql.execution;
 
 import org.opencds.cqf.cql.execution.tests.Test;
 
-/**
- * Created by Darren on 2018 Mar 8.
- */
 public class TestDefinition
 {
     public enum MainFormat { EXPRESSION_PAIR, LIBRARY }

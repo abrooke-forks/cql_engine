@@ -10,9 +10,6 @@ If the pattern is not found, the result is -1.
 If either argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class PositionOfEvaluator extends org.cqframework.cql.elm.execution.PositionOf {
 
     public static Object positionOf(Object pattern, Object string) {

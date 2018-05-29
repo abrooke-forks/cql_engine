@@ -9,9 +9,6 @@ The First operator returns the first element in a list. The operator is equivale
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class FirstEvaluator extends org.cqframework.cql.elm.execution.First {
 
     public static Object first(Object source) {
@@ -30,7 +27,6 @@ public class FirstEvaluator extends org.cqframework.cql.elm.execution.First {
     @Override
     public Object evaluate(Context context) {
         Object source = getSource().evaluate(context);
-
         return context.logTrace(this.getClass(), first(source), source);
     }
 }

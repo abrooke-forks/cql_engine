@@ -14,9 +14,6 @@ If the stringToSplit argument does not contain any appearances of the separator,
   the result is a list of strings containing one element that is the value of the stringToSplit argument.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class SplitEvaluator extends org.cqframework.cql.elm.execution.Split {
 
     public static Object split(Object stringToSplit, Object separator) {

@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.*;
 
@@ -17,12 +16,9 @@ If the list of intervals contains nulls, they will be excluded from the resultin
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Chris Schuler on 6/8/2016
- */
 public class CollapseEvaluator extends org.cqframework.cql.elm.execution.Collapse {
 
-    public static Object collapse(Iterable<Object> list) {
+    public static Object collapse(Iterable list) {
 
         if (list == null) {
             return null;
@@ -72,12 +68,12 @@ public class CollapseEvaluator extends org.cqframework.cql.elm.execution.Collaps
 
         for (int i = 0; i < intervals.size(); ++i) {
             if ((i+1) < intervals.size()) {
-                if (OverlapsEvaluator.overlaps(intervals.get(i), intervals.get(i+1))) {
+                if (OverlapsEvaluator.overlaps(intervals.get(i), intervals.get(i+1), null)) {
                     intervals.set(i, new Interval((intervals.get(i)).getStart(), true, (intervals.get(i+1)).getEnd(), true));
                     intervals.remove(i+1);
                     i -= 1;
                 }
-                else if ((Boolean) MeetsBeforeEvaluator.meetsBefore(intervals.get(i), intervals.get(i+1))) {
+                else if (MeetsBeforeEvaluator.meetsBefore(intervals.get(i), intervals.get(i+1), null)) {
                     intervals.set(i, new Interval((intervals.get(i)).getStart(), true, (intervals.get(i+1)).getEnd(), true));
                     intervals.remove(i+1);
                     i -= 1;
@@ -90,7 +86,7 @@ public class CollapseEvaluator extends org.cqframework.cql.elm.execution.Collaps
 
     @Override
     public Object evaluate(Context context) {
-        Iterable<Object> list = (Iterable<Object>)getOperand().evaluate(context);
+        Iterable list = (Iterable)getOperand().evaluate(context);
 
         return context.logTrace(this.getClass(), collapse(list), list);
     }

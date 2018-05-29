@@ -11,9 +11,6 @@ The Combine operator combines a list of strings, optionally separating each stri
 If either argument is null, or any element in the source list of strings is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class CombineEvaluator extends org.cqframework.cql.elm.execution.Combine {
 
     public static Object combine(Object source, String separator) {
@@ -24,7 +21,7 @@ public class CombineEvaluator extends org.cqframework.cql.elm.execution.Combine 
 
         else {
             if (source instanceof Iterable) {
-                StringBuffer buffer = new StringBuffer("");
+                StringBuilder buffer = new StringBuilder("");
                 Iterator iterator = ((Iterable) source).iterator();
                 boolean first = true;
 

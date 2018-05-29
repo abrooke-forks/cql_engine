@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Value;
 
 /*
 IndexOf(argument List<T>, element T) Integer
@@ -13,9 +12,6 @@ If the list is empty, or no element is found, the result is -1.
 If the list argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class IndexOfEvaluator extends org.cqframework.cql.elm.execution.IndexOf {
 
     public static Object indexOf(Object source, Object elementToFind) {

@@ -2,9 +2,7 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.BaseTemporal;
-import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Interval;
-import org.opencds.cqf.cql.runtime.Time;
 
 /*
 *** NOTES FOR INTERVAL ***
@@ -32,9 +30,6 @@ If the left argument is null, the result is null. If the right argument is null,
 
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class InEvaluator extends org.cqframework.cql.elm.execution.In {
 
     public static Boolean in(Object left, Object right, String precision) {

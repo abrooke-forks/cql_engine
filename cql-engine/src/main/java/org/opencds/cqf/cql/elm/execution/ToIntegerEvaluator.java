@@ -14,9 +14,6 @@ If the input string is not formatted correctly, or cannot be interpreted as a va
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Chris Schuler on 6/14/2016
- */
 public class ToIntegerEvaluator extends org.cqframework.cql.elm.execution.ToInteger {
 
     public static Object toInteger(Object operand) {
@@ -38,7 +35,6 @@ public class ToIntegerEvaluator extends org.cqframework.cql.elm.execution.ToInte
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-
         return context.logTrace(this.getClass(), toInteger(operand), operand);
     }
 }

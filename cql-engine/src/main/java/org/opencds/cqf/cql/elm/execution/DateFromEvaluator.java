@@ -1,20 +1,17 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.joda.time.LocalDate;
-import org.joda.time.Partial;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.DateTime;
+import org.opencds.cqf.cql.runtime.Precision;
+
+import java.math.BigDecimal;
 
 /*
 date from(argument DateTime) DateTime
 
-NOTE: this is within the purview of DateTimeComponentFrom
-  Description available in that class
+NOTE: Description available in DateTimeComponentFrom class
 */
 
-/**
- * Created by Chris Schuler on 6/22/2016
- */
 public class DateFromEvaluator extends org.cqframework.cql.elm.execution.DateFrom {
 
     public static Object dateFrom(Object operand) {
@@ -24,10 +21,11 @@ public class DateFromEvaluator extends org.cqframework.cql.elm.execution.DateFro
         }
 
         if (operand instanceof DateTime) {
-            int year = ((DateTime)operand).getJodaDateTime().getYear();
-            int month = ((DateTime)operand).getJodaDateTime().getMonthOfYear();
-            int day = ((DateTime)operand).getJodaDateTime().getDayOfMonth();
-            return new DateTime(new Partial(DateTime.getFields(3), new int[]{year, month, day}), ((DateTime)operand).getTimezone());
+            Integer year = ((DateTime)operand).getComponentFrom(Precision.YEAR);
+            Integer month = ((DateTime)operand).getComponentFrom(Precision.MONTH);
+            Integer day = ((DateTime)operand).getComponentFrom(Precision.DAY);
+            BigDecimal offset = ((DateTime) operand).getDecimalOffset();
+            return new DateTime(year, month, day, null, null, null, null, offset);
         }
 
         throw new IllegalArgumentException(String.format("Cannot DateFrom arguments of type '%s'.", operand.getClass().getName()));

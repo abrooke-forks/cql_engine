@@ -6,9 +6,6 @@ import org.opencds.cqf.cql.runtime.Quantity;
 
 import java.math.BigDecimal;
 
-/**
- * Created by Christopher Schuler on 6/12/2017.
- */
 public class PointFromEvaluator extends org.cqframework.cql.elm.execution.PointFrom {
 
     public static Object pointFrom(Object operand) {
@@ -49,7 +46,6 @@ public class PointFromEvaluator extends org.cqframework.cql.elm.execution.PointF
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-
         return context.logTrace(this.getClass(), pointFrom(operand), operand);
     }
 }

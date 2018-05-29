@@ -8,9 +8,6 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.elm.tracking.TrackBack;
 
-/**
- * Created by Darren on 2017-11-15.
- */
 public class CqlToElmLib
 {
     public static String maybeCqlToElm(String maybeCql)

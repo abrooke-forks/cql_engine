@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.joda.time.Instant;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.*;
 
@@ -32,9 +31,6 @@ If either argument is null, the result is null.
 Note that this operator can be invoked using either the on or after or the after or on syntax.
 */
 
-/**
- * Created by Chris Schuler on 6/23/2016
- */
 public class SameOrAfterEvaluator extends org.cqframework.cql.elm.execution.SameOrAfter {
 
     public static Boolean onOrAfter(Object left, Object right, String precision) {
@@ -77,42 +73,18 @@ public class SameOrAfterEvaluator extends org.cqframework.cql.elm.execution.Same
             return onOrAfter(left, right, precision);
         }
 
-        if (precision == null) {
-            precision = "millisecond";
+        if (precision == null && left instanceof BaseTemporal && right instanceof BaseTemporal) {
+            return left.equals(right);
         }
 
-        if (left instanceof BaseTemporal && right instanceof BaseTemporal) {
-            BaseTemporal leftTemporal = (BaseTemporal) left;
-            BaseTemporal rightTemporal = (BaseTemporal) right;
+        // same precision or after(left DateTime, right DateTime)
+        if (left instanceof DateTime && right instanceof DateTime) {
+            return ((DateTime) left).sameOrAfter((DateTime) right, precision);
+        }
 
-            int idx = DateTime.getFieldIndex(precision);
-
-            if (idx != -1) {
-                // check level of precision
-                if (Uncertainty.isUncertain(leftTemporal, precision) || Uncertainty.isUncertain(rightTemporal, precision)) {
-                    return null;
-                }
-
-                Instant leftInstant = leftTemporal.getJodaDateTime().toInstant();
-                Instant rightInstant = rightTemporal.getJodaDateTime().toInstant();
-
-                for (int i = 0; i < idx + 1; ++i) {
-                    if (leftInstant.get(DateTime.getField(i)) > rightInstant.get(DateTime.getField(i)))
-                    {
-                        return true;
-                    }
-                    else if (leftInstant.get(DateTime.getField(i)) < rightInstant.get(DateTime.getField(i)))
-                    {
-                        return false;
-                    }
-                }
-
-                return leftInstant.get(DateTime.getField(idx)) >= rightInstant.get(DateTime.getField(idx));
-            }
-
-            else {
-                throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-            }
+        // same precision or after(left Time, right Time)
+        if (left instanceof Time && right instanceof Time) {
+            return ((Time) left).sameOrAfter((Time) right, precision);
         }
 
         throw new IllegalArgumentException(String.format("Cannot perform SameOrAfter operation with arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));

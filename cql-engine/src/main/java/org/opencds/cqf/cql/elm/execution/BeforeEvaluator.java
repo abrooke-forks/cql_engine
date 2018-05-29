@@ -31,9 +31,6 @@ For comparisons involving date/time or time values with imprecision, note that t
 If either or both arguments are null, the result is null.
 */
 
-/**
- * Created by Chris Schuler on 6/7/2016
- */
 public class BeforeEvaluator extends org.cqframework.cql.elm.execution.Before {
 
     public static Boolean before(Object left, Object right, String precision) {
@@ -42,73 +39,37 @@ public class BeforeEvaluator extends org.cqframework.cql.elm.execution.Before {
             return null;
         }
 
+        // before (Interval, Interval)
         if (left instanceof Interval && right instanceof Interval) {
             return LessEvaluator.less(((Interval)left).getStart(), ((Interval)right).getEnd());
         }
 
+        // before (Interval, Point)
         else if (left instanceof Interval) {
             return LessEvaluator.less(((Interval)left).getEnd(), right);
         }
 
+        // before (Point, Interval)
         else if (right instanceof Interval) {
             return LessEvaluator.less(left, ((Interval)right).getStart());
         }
 
-        else if (left instanceof BaseTemporal && right instanceof BaseTemporal) {
-            BaseTemporal leftTemporal = (BaseTemporal) left;
-            BaseTemporal rightTemporal = (BaseTemporal) right;
-
-            if (precision == null) {
-                precision = "millisecond";
+        // before precision of (DateTime, DateTime)
+        else if (left instanceof DateTime && right instanceof DateTime) {
+            if (((BaseTemporal) left).equal(right)) {
+                return false;
             }
+            Boolean after = ((DateTime) left).after((DateTime) right, Precision.toPrecision(precision));
+            return after == null ? null : !after;
+        }
 
-            int idx = leftTemporal.getIsDateTime() ? DateTime.getFieldIndex(precision) : Time.getFieldIndex(precision);
-
-            if (idx != -1) {
-                // check level of precision
-                if (Uncertainty.isUncertain(leftTemporal, precision) || Uncertainty.isUncertain(rightTemporal, precision)) {
-
-                    if (Uncertainty.isUncertain(leftTemporal, precision)) {
-                        return LessEvaluator.less(((List) Uncertainty.getHighLowList(leftTemporal, precision)).get(0), rightTemporal);
-                    }
-
-                    else if (Uncertainty.isUncertain(rightTemporal, precision)) {
-                        return LessEvaluator.less(leftTemporal, ((List)Uncertainty.getHighLowList(rightTemporal, precision)).get(1));
-                    }
-
-                    return null;
-                }
-
-                if (leftTemporal.getTimezone().getID().equals(rightTemporal.getTimezone().getID())) {
-                    for (int i = 0; i < idx; i++) {
-                        if (leftTemporal.getPartial().getValue(i) > rightTemporal.getPartial().getValue(i)) {
-                            return false;
-                        }
-                        else if (leftTemporal.getPartial().getValue(i) < rightTemporal.getPartial().getValue(i)) {
-                            return true;
-                        }
-                    }
-                    return leftTemporal.getPartial().getValue(idx) < rightTemporal.getPartial().getValue(idx);
-                }
-
-                else {
-                    Instant leftInstant = leftTemporal.getJodaDateTime().toInstant();
-                    Instant rightInstant = rightTemporal.getJodaDateTime().toInstant();
-                    for (int i = 0; i < idx; i++) {
-                        if (leftInstant.get(DateTime.getField(i)) > rightInstant.get(DateTime.getField(i))) {
-                            return false;
-                        }
-                        else if (leftInstant.get(DateTime.getField(i)) < rightInstant.get(DateTime.getField(i))) {
-                            return true;
-                        }
-                    }
-                    return leftInstant.get(DateTime.getField(idx)) < rightInstant.get(DateTime.getField(idx));
-                }
+        // before precision of (Time, Time)
+        else if (left instanceof Time && right instanceof Time) {
+            if (((BaseTemporal) left).equal(right)) {
+                return false;
             }
-
-            else {
-                throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-            }
+            Boolean after = ((Time) left).after((Time) right, Precision.toPrecision(precision));
+            return after == null ? null : !after;
         }
 
         throw new IllegalArgumentException(String.format("Cannot Before arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));

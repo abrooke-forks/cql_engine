@@ -17,9 +17,6 @@ If the input string is not formatted correctly, or cannot be interpreted as a va
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class ToDecimalEvaluator extends org.cqframework.cql.elm.execution.ToDecimal {
 
     public static Object toDecimal(Object operand) {
@@ -50,7 +47,6 @@ public class ToDecimalEvaluator extends org.cqframework.cql.elm.execution.ToDeci
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-
         return context.logTrace(this.getClass(), toDecimal(operand), operand);
     }
 }

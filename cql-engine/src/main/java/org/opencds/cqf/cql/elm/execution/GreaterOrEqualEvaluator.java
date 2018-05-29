@@ -21,9 +21,6 @@ For comparisons involving date/time or time values with imprecision, note that t
 If either argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class GreaterOrEqualEvaluator extends org.cqframework.cql.elm.execution.GreaterOrEqual {
 
   public static Boolean greaterOrEqual(Object left, Object right) {
@@ -61,12 +58,12 @@ public class GreaterOrEqualEvaluator extends org.cqframework.cql.elm.execution.G
           return ((String) left).compareTo((String) right) >= 0;
       }
 
-      else if (left instanceof Uncertainty && right instanceof Integer) {
-          if (InEvaluator.in(right, ((Uncertainty) left).getUncertaintyInterval(), null)) {
-              return null;
-          }
-          return ((Integer)((Uncertainty) left).getUncertaintyInterval().getStart()).compareTo((Integer) right) >= 0;
-      }
+//      else if (left instanceof Uncertainty && right instanceof Integer) {
+//          if (InEvaluator.in(right, ((Uncertainty) left).getUncertaintyInterval(), null)) {
+//              return null;
+//          }
+//          return ((Integer)((Uncertainty) left).getUncertaintyInterval().getStart()).compareTo((Integer) right) >= 0;
+//      }
 
       throw new IllegalArgumentException(
               String.format("Cannot perform greater than or equal operator on types %s and %s",

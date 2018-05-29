@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.cql.execution.Context;
 
 /*
@@ -33,9 +32,6 @@ For specific semantics for each conversion, refer to the explicit conversion ope
 
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class ConvertEvaluator extends org.cqframework.cql.elm.execution.Convert {
 
     private Class resolveType(Context context) {

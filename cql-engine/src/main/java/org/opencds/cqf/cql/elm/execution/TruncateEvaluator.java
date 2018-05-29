@@ -12,9 +12,6 @@ When invoked with an Integer argument, the argument will be implicitly converted
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class TruncateEvaluator extends org.cqframework.cql.elm.execution.Truncate {
 
     public static Object truncate(Object operand) {
@@ -38,7 +35,6 @@ public class TruncateEvaluator extends org.cqframework.cql.elm.execution.Truncat
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-
         return context.logTrace(this.getClass(), truncate(operand), operand);
     }
 }

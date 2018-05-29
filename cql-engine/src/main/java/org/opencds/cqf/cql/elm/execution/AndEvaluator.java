@@ -15,12 +15,9 @@ define IsAlsoFalse = false and null
 define IsNull = true and null
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class AndEvaluator extends org.cqframework.cql.elm.execution.And {
 
-    public static Object and(Boolean left, Boolean right) {
+    public static Boolean and(Boolean left, Boolean right) {
         if (left == null || right == null) {
             if ((left != null && !left) || (right != null && !right)) {
                 return false;

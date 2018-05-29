@@ -12,9 +12,6 @@ import org.opencds.cqf.cql.execution.tests.Group;
 import org.opencds.cqf.cql.execution.tests.Tests;
 import org.opencds.cqf.cql.execution.tests.Test;
 
-/**
- * Created by Darren on 2018 Mar 9.
- */
 public class TestDefinitionSourceProvider
 {
     // Note: gatherTestsFromJavaResourceXmlFiles() is not atomic;

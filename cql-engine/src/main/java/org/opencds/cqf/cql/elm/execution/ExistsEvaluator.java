@@ -10,9 +10,6 @@ The exists operator returns true if the list contains any elements, including nu
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class ExistsEvaluator extends org.cqframework.cql.elm.execution.Exists {
 
     public static Object exists(Object operand) {
@@ -29,8 +26,7 @@ public class ExistsEvaluator extends org.cqframework.cql.elm.execution.Exists {
 
     @Override
     public Object evaluate(Context context) {
-        Object operand= getOperand().evaluate(context);
-
+        Object operand = getOperand().evaluate(context);
         return context.logTrace(this.getClass(), exists(operand), operand);
     }
 }

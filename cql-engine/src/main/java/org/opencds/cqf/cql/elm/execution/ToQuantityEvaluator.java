@@ -16,9 +16,6 @@ If the argument is null, the result is null.
 ToQuantity('5.5 cm2'), ToQuantity('5.5cm2'), or ToQuantity('5.5') - optional +/- at beginning
 */
 
-/**
- * Created by Chris Schuler on 6/14/2016
- */
 public class ToQuantityEvaluator extends org.cqframework.cql.elm.execution.ToQuantity {
 
     public static Object toQuantity(Object operand) {
@@ -57,7 +54,6 @@ public class ToQuantityEvaluator extends org.cqframework.cql.elm.execution.ToQua
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-
         return context.logTrace(this.getClass(), toQuantity(operand), operand);
     }
 }

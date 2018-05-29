@@ -17,9 +17,6 @@ Note that to avoid returning an improper interval, if the second argument is pro
 If either argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class ExceptEvaluator extends org.cqframework.cql.elm.execution.Except {
 
     public static Object except(Object left, Object right) {
@@ -77,7 +74,6 @@ public class ExceptEvaluator extends org.cqframework.cql.elm.execution.Except {
 
     @Override
     public Object evaluate(Context context) {
-
         Object left = getOperand().get(0).evaluate(context);
         Object right = getOperand().get(1).evaluate(context);
 

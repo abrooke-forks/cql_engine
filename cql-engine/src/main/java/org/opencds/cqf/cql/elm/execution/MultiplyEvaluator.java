@@ -1,9 +1,7 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.Interval;
 import org.opencds.cqf.cql.runtime.Quantity;
-import org.opencds.cqf.cql.runtime.Uncertainty;
 import org.opencds.cqf.cql.runtime.Value;
 
 import java.math.BigDecimal;
@@ -24,9 +22,6 @@ In this example, the first result will have a unit of 'cm2', and the second resu
 If either argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class MultiplyEvaluator extends org.cqframework.cql.elm.execution.Multiply {
 
   public static Object multiply(Object left, Object right) {
@@ -65,11 +60,11 @@ public class MultiplyEvaluator extends org.cqframework.cql.elm.execution.Multipl
     }
 
     // *(Uncertainty, Uncertainty)
-    else if (left instanceof Uncertainty && right instanceof Uncertainty) {
-      Interval leftInterval = ((Uncertainty)left).getUncertaintyInterval();
-      Interval rightInterval = ((Uncertainty)right).getUncertaintyInterval();
-      return new Uncertainty().withUncertaintyInterval(new Interval(multiply(leftInterval.getStart(), rightInterval.getStart()), true, multiply(leftInterval.getEnd(), rightInterval.getEnd()), true));
-    }
+//    else if (left instanceof Uncertainty && right instanceof Uncertainty) {
+//      Interval leftInterval = ((Uncertainty)left).getUncertaintyInterval();
+//      Interval rightInterval = ((Uncertainty)right).getUncertaintyInterval();
+//      return new Uncertainty().withUncertaintyInterval(new Interval(multiply(leftInterval.getStart(), rightInterval.getStart()), true, multiply(leftInterval.getEnd(), rightInterval.getEnd()), true));
+//    }
 
     throw new IllegalArgumentException(String.format("Cannot Multiply arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
   }

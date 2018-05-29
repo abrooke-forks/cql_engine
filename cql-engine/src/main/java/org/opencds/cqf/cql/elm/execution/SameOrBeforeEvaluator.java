@@ -1,12 +1,11 @@
 package org.opencds.cqf.cql.elm.execution;
 
-import org.joda.time.Instant;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.*;
 
 /*
 same precision or before(left DateTime, right DateTime) Boolean
-same precision or before(left DateTime, right DateTime) Boolean
+same precision or before(left Time, right Time) Boolean
 
 The same-precision-or before operator compares two date/time values to the specified precision to determine
   whether the first argument is the same or before the second argument.
@@ -31,9 +30,6 @@ If either argument is null, the result is null.
 Note that this operator can be invoked using either the on or before or the before or on syntax.
 */
 
-/**
- * Created by Chris Schuler on 6/23/2016
- */
 public class SameOrBeforeEvaluator extends org.cqframework.cql.elm.execution.SameOrBefore {
 
     public static Boolean onOrBefore(Object left, Object right, String precision) {
@@ -76,42 +72,18 @@ public class SameOrBeforeEvaluator extends org.cqframework.cql.elm.execution.Sam
             return onOrBefore(left, right, precision);
         }
 
-        if (precision == null) {
-            precision = "millisecond";
+        if (precision == null && left instanceof BaseTemporal && right instanceof BaseTemporal) {
+            return left.equals(right);
         }
 
-        if (left instanceof BaseTemporal && right instanceof BaseTemporal) {
-            BaseTemporal leftTemporal = (BaseTemporal) left;
-            BaseTemporal rightTemporal = (BaseTemporal) right;
+        // same precision or before(left DateTime, right DateTime)
+        if (left instanceof DateTime && right instanceof DateTime) {
+            return ((DateTime) left).sameOrBefore((DateTime) right, precision);
+        }
 
-            int idx = DateTime.getFieldIndex(precision);
-
-            if (idx != -1) {
-                // check level of precision
-                if (Uncertainty.isUncertain(leftTemporal, precision) || Uncertainty.isUncertain(rightTemporal, precision)) {
-                    return null;
-                }
-
-                Instant leftInstant = leftTemporal.getJodaDateTime().toInstant();
-                Instant rightInstant = rightTemporal.getJodaDateTime().toInstant();
-
-                for (int i = 0; i < idx + 1; ++i) {
-                    if (leftInstant.get(DateTime.getField(i)) < rightInstant.get(DateTime.getField(i)))
-                    {
-                        return true;
-                    }
-                    else if (leftInstant.get(DateTime.getField(i)) > rightInstant.get(DateTime.getField(i)))
-                    {
-                        return false;
-                    }
-                }
-
-                return leftInstant.get(DateTime.getField(idx)) <= rightInstant.get(DateTime.getField(idx));
-            }
-
-            else {
-                throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-            }
+        // same precision or before(left Time, right Time)
+        if (left instanceof Time && right instanceof Time) {
+            return ((Time) left).sameOrBefore((Time) right, precision);
         }
 
         throw new IllegalArgumentException(String.format("Cannot SameOrBefore arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));

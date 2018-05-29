@@ -3,9 +3,6 @@ package org.opencds.cqf.cql.execution;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-/**
- * Created by Christopher Schuler on 6/9/2017.
- */
 public class TraceExecution {
 
     private Deque<String> trace;

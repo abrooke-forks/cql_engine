@@ -1,6 +1,5 @@
 package org.opencds.cqf.cql.execution;
 
-import org.joda.time.Partial;
 import org.opencds.cqf.cql.runtime.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -30,10 +29,12 @@ public class CqlTypesTest extends CqlExecutionTestBase {
         Assert.assertTrue(((Quantity) result).equal(new Quantity().withValue(new BigDecimal("5.0")).withUnit("g")));
 
         result = context.resolveExpressionRef("AnyDateTime").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 4, 4})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 4, 4})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(2012, 4, 4, null, null, null, null, null)));
 
         result = context.resolveExpressionRef("AnyTime").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {9, 0, 0, 0})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {9, 0, 0, 0})));
+        Assert.assertTrue(((Time) result).equal(new Time(9, 0, 0, 0, null)));
 
         result = context.resolveExpressionRef("AnyInterval").getExpression().evaluate(context);
         Assert.assertTrue(((Interval) result).equal(new Interval(2, true, 7, true)));
@@ -111,19 +112,24 @@ public class CqlTypesTest extends CqlExecutionTestBase {
         }
 
         result = context.resolveExpressionRef("DateTimeProper").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {2016, 7, 7, 6, 25, 33, 910})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {2016, 7, 7, 6, 25, 33, 910})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(2016, 7, 7, 6, 25, 33, 910, null)));
 
         result = context.resolveExpressionRef("DateTimeIncomplete").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2015, 2, 10})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2015, 2, 10})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(2015, 2, 10, null, null, null, null, null)));
 
-        result = context.resolveExpressionRef("DateTimeUncertain").getExpression().evaluate(context);
-        Assert.assertTrue(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(19, true, 49, true)));
+//        result = context.resolveExpressionRef("DateTimeUncertain").getExpression().evaluate(context);
+//        Assert.assertTrue(((Uncertainty)result).getUncertaintyInterval().equal(new Interval(19, true, 49, true)));
 
         result = context.resolveExpressionRef("DateTimeMin").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {0001, 1, 1, 0, 0, 0, 0})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {0001, 1, 1, 0, 0, 0, 0})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(0001, 1, 1, 0, 0, 0, 0, null)));
 
         result = context.resolveExpressionRef("DateTimeMax").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {9999, 12, 31, 23, 59, 59, 999})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(7), new int[] {9999, 12, 31, 23, 59, 59, 999})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(9999, 12, 31, 23, 59, 59, 999, null)));
+
     }
 
     @Test
@@ -195,12 +201,15 @@ public class CqlTypesTest extends CqlExecutionTestBase {
     public void testTime() throws JAXBException {
         Context context = new Context(library);
         Object result = context.resolveExpressionRef("TimeProper").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {10, 25, 12, 863})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {10, 25, 12, 863})));
+        Assert.assertTrue(((Time) result).equal(new Time(10, 25, 12, 863, null)));
 
         result = context.resolveExpressionRef("TimeAllMax").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {23, 59, 59, 999})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {23, 59, 59, 999})));
+        Assert.assertTrue(((Time) result).equal(new Time(23, 59, 59, 999, null)));
 
         result = context.resolveExpressionRef("TimeAllMin").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {0, 0, 0, 0})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {0, 0, 0, 0})));
+        Assert.assertTrue(((Time) result).equal(new Time(0, 0, 0, 0, null)));
     }
 }

@@ -3,9 +3,6 @@ package org.opencds.cqf.cql.elm.execution;
 import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.*;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 /*
 *** NOTES FOR CLINICAL OPERATORS ***
 ~(left Code, right Code) Boolean
@@ -34,9 +31,6 @@ The ~ operator for lists returns true if and only if the lists contain elements 
   and for each element in the lists, in order, the elements are equivalent.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class EquivalentEvaluator extends org.cqframework.cql.elm.execution.Equivalent {
 
     public static Boolean equivalent(Object left, Object right) {

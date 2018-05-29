@@ -123,10 +123,12 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
         assertThat(result, is("zebra"));
 
         result = context.resolveExpressionRef("MaxTestDateTime").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 10, 6})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 10, 6})));
+        Assert.assertTrue(((DateTime)result).equal(new DateTime(2012, 10, 6, null, null, null, null, null)));
 
         result = context.resolveExpressionRef("MaxTestTime").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {20, 59, 59, 999})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {20, 59, 59, 999})));
+        Assert.assertTrue(((Time)result).equal(new Time(20, 59, 59, 999, null)));
     }
 
     /**
@@ -154,10 +156,12 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
         assertThat(result, is("bye"));
 
         result = context.resolveExpressionRef("MinTestDateTime").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 9, 5})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 9, 5})));
+        Assert.assertTrue(((DateTime)result).equal(new DateTime(2012, 9, 5, null, null, null, null, null)));
 
         result = context.resolveExpressionRef("MinTestTime").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 59, 59, 999})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 59, 59, 999})));
+        Assert.assertTrue(((Time)result).equal(new Time(5, 59, 59, 999, null)));
     }
 
     /**
@@ -170,11 +174,12 @@ public class CqlAggregateFunctionsTest extends CqlExecutionTestBase {
         // TODO: ModeTestInteger
 
         Object result = context.resolveExpressionRef("ModeTestDateTime").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 9, 5})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 9, 5})));
+        Assert.assertTrue(((DateTime)result).equal(new DateTime(2012, 9, 5, null, null, null, null, null)));
 
         result = context.resolveExpressionRef("ModeTestTime").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 59, 59, 999})));
-    }
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 59, 59, 999})));
+        Assert.assertTrue(((Time)result).equal(new Time(5, 59, 59, 999, null)));}
 
     /**
      * {@link org.opencds.cqf.cql.elm.execution.StdDevEvaluator#evaluate(Context)}

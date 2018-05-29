@@ -4,7 +4,6 @@ import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.BaseTemporal;
 import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Time;
-import org.opencds.cqf.cql.runtime.Uncertainty;
 
 /*
 same precision as(left DateTime, right DateTime) Boolean
@@ -22,9 +21,6 @@ For comparisons involving date/time or time values with imprecision, note that t
 If either or both arguments are null, the result is null.
 */
 
-/**
- * Created by Chris Schuler on 6/23/2016
- */
 public class SameAsEvaluator extends org.cqframework.cql.elm.execution.SameAs {
 
     public static Boolean sameAs(Object left, Object right, String precision) {
@@ -32,36 +28,18 @@ public class SameAsEvaluator extends org.cqframework.cql.elm.execution.SameAs {
             return null;
         }
 
-        if (precision == null) {
-            precision = "millisecond";
+        if (precision == null && left instanceof BaseTemporal && right instanceof BaseTemporal) {
+            return left.equals(right);
         }
 
-        if (left instanceof BaseTemporal && right instanceof BaseTemporal) {
-            BaseTemporal leftTemporal = (BaseTemporal) left;
-            BaseTemporal rightTemporal = (BaseTemporal) right;
+        // same precision as(left DateTime, right DateTime)
+        if (left instanceof DateTime && right instanceof DateTime) {
+            return ((DateTime) left).sameAs((DateTime) right, precision);
+        }
 
-            int idx = DateTime.getFieldIndex(precision);
-
-            if (idx != -1) {
-                // check level of precision
-                if (Uncertainty.isUncertain(leftTemporal, precision) || Uncertainty.isUncertain(rightTemporal, precision)) {
-                    return null;
-                }
-
-                for (int i = 0; i < idx + 1; ++i) {
-                    if (leftTemporal.getJodaDateTime().toInstant().get(DateTime.getField(i))
-                            != rightTemporal.getJodaDateTime().toInstant().get(DateTime.getField(i)))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            else {
-                throw new IllegalArgumentException(String.format("Invalid duration precision: %s", precision));
-            }
+        // same precision as(left Time, right Time)
+        if (left instanceof Time && right instanceof Time) {
+            return ((Time) left).sameAs((Time) right, precision);
         }
 
         throw new IllegalArgumentException(String.format("Cannot perform SameAs operation with arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));

@@ -12,9 +12,6 @@ If the source contains no non-null elements, false is returned.
 If the source is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class AnyTrueEvaluator extends org.cqframework.cql.elm.execution.AnyTrue {
 
     public static Object anyTrue(Object src) {
@@ -55,9 +52,7 @@ public class AnyTrueEvaluator extends org.cqframework.cql.elm.execution.AnyTrue 
 
     @Override
     public Object evaluate(Context context) {
-
         Object src = getSource().evaluate(context);
-
         return context.logTrace(this.getClass(), anyTrue(src), src);
     }
 }

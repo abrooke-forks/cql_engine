@@ -1,8 +1,8 @@
 package org.opencds.cqf.cql.execution;
 
-import org.joda.time.Partial;
 import org.opencds.cqf.cql.runtime.DateTime;
 import org.opencds.cqf.cql.runtime.Time;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
@@ -43,16 +43,20 @@ public class CqlNullologicalOperatorsTest extends CqlExecutionTestBase {
         assertThat(result, is(Collections.singletonList("a")));
 
         result = context.resolveExpressionRef("DateTimeCoalesce").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 5, 18})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 5, 18})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(2012, 5, 18, null, null, null, null, null)));
 
         result = context.resolveExpressionRef("DateTimeListCoalesce").getExpression().evaluate(context);
-        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 5, 18})));
+//        assertThat(((DateTime)result).getPartial(), is(new Partial(DateTime.getFields(3), new int[] {2012, 5, 18})));
+        Assert.assertTrue(((DateTime) result).equal(new DateTime(2012, 5, 18, null, null, null, null, null)));
 
         result = context.resolveExpressionRef("TimeCoalesce").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 15, 33, 556})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 15, 33, 556})));
+        Assert.assertTrue(((Time) result).equal(new Time(5, 15, 33, 556, null)));
 
         result = context.resolveExpressionRef("TimeListCoalesce").getExpression().evaluate(context);
-        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 15, 33, 556})));
+//        assertThat(((Time)result).getPartial(), is(new Partial(Time.getFields(4), new int[] {5, 15, 33, 556})));
+        Assert.assertTrue(((Time) result).equal(new Time(5, 15, 33, 556, null)));
     }
 
     /**

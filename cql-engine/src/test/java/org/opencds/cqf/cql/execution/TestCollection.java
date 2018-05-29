@@ -7,9 +7,6 @@ import javax.management.openmbean.KeyAlreadyExistsException;
 
 import org.opencds.cqf.cql.execution.tests.Tests;
 
-/**
- * Created by Darren on 2018 Mar 8.
- */
 public class TestCollection
 {
     private HashMap<String, TestDefinition> definitions = new HashMap<>();

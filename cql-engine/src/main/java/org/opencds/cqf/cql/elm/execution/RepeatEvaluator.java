@@ -3,9 +3,6 @@ package org.opencds.cqf.cql.elm.execution;
 import org.apache.commons.lang3.NotImplementedException;
 import org.opencds.cqf.cql.execution.Context;
 
-/**
- * Created by Christopher Schuler on 6/13/2017.
- */
 public class RepeatEvaluator extends org.cqframework.cql.elm.execution.Repeat {
 
     public static Object repeat(Object source, Object element, String scope) {

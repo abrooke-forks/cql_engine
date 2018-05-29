@@ -7,9 +7,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Christopher Schuler on 6/13/2017.
- */
 public class ChildrenEvaluator extends org.cqframework.cql.elm.execution.Children {
 
     private static void addQuantity(List<Object> list, Quantity quantity) {
@@ -32,21 +29,21 @@ public class ChildrenEvaluator extends org.cqframework.cql.elm.execution.Childre
         list.add(concept.getDisplay());
     }
 
-    private static void addDateTime(List<Object> list, DateTime dateTime) {
-        for (int i = 0; i < dateTime.getPartial().size(); ++i) {
-            list.add(dateTime.getPartial().get(DateTime.getField(i)));
-        }
-
-        list.add(dateTime.getTimezoneOffset());
-    }
-
-    private static void addTime(List<Object> list, Time time) {
-        for (int i = 0; i < time.getPartial().size(); ++i) {
-            list.add(time.getPartial().get(Time.getField(i)));
-        }
-
-        list.add(time.getTimezoneOffset());
-    }
+//    private static void addDateTime(List<Object> list, DateTime dateTime) {
+//        for (int i = 0; i < dateTime.getPartial().size(); ++i) {
+//            list.add(dateTime.getPartial().get(DateTime.getField(i)));
+//        }
+//
+//        list.add(dateTime.getTimezoneOffset());
+//    }
+//
+//    private static void addTime(List<Object> list, Time time) {
+//        for (int i = 0; i < time.getPartial().size(); ++i) {
+//            list.add(time.getPartial().get(Time.getField(i)));
+//        }
+//
+//        list.add(time.getTimezoneOffset());
+//    }
 
     private static void addList(List<Object> list, List<Object> listToProcess) {
         for (Object o : listToProcess) {
@@ -81,13 +78,13 @@ public class ChildrenEvaluator extends org.cqframework.cql.elm.execution.Childre
             addConcept(ret, (Concept) source);
         }
 
-        else if (source instanceof DateTime) {
-            addDateTime(ret, (DateTime) source);
-        }
-
-        else if (source instanceof Time) {
-            addTime(ret, (Time) source);
-        }
+//        else if (source instanceof DateTime) {
+//            addDateTime(ret, (DateTime) source);
+//        }
+//
+//        else if (source instanceof Time) {
+//            addTime(ret, (Time) source);
+//        }
 
         else if (source instanceof Iterable) {
             addList(ret, (List<Object>) source);

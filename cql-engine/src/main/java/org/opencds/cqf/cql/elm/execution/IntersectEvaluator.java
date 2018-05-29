@@ -24,9 +24,6 @@ This operator uses the notion of equivalence to determine whether or not two ele
 If either argument is null, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class IntersectEvaluator extends org.cqframework.cql.elm.execution.Intersect {
 
     public static Object intersect(Object left, Object right) {
@@ -39,14 +36,20 @@ public class IntersectEvaluator extends org.cqframework.cql.elm.execution.Inters
             Interval leftInterval = (Interval)left;
             Interval rightInterval = (Interval)right;
 
-            if (!OverlapsEvaluator.overlaps(leftInterval, rightInterval)) { return null; }
+            if (!OverlapsEvaluator.overlaps(leftInterval, rightInterval, null)) {
+                return null;
+            }
 
             Object leftStart = leftInterval.getStart();
             Object leftEnd = leftInterval.getEnd();
             Object rightStart = rightInterval.getStart();
             Object rightEnd = rightInterval.getEnd();
 
-            if (leftStart == null || leftEnd == null || rightStart == null || rightEnd == null) { return null; }
+            if (leftStart == null || leftEnd == null
+                    || rightStart == null || rightEnd == null)
+            {
+                return null;
+            }
 
             Object max = GreaterEvaluator.greater(leftStart, rightStart) ? leftStart : rightStart;
             Object min = LessEvaluator.less(leftEnd, rightEnd) ? leftEnd : rightEnd;

@@ -2,9 +2,6 @@ package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
 
-/**
- * Created by Christopher Schuler on 6/20/2017.
- */
 public class ReplaceMatchesEvaluator extends org.cqframework.cql.elm.execution.ReplaceMatches {
 
     public static Object replaceMatches(String argument, String pattern, String substitution) {

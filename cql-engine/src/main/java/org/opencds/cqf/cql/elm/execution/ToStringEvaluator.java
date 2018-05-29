@@ -25,9 +25,6 @@ Time	     Thh:mm:ss.fff(+|-)hh:mm
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Chris Schuler on 6/14/2016
- */
 public class ToStringEvaluator extends org.cqframework.cql.elm.execution.ToString {
 
     public static Object toString(Object operand) {
@@ -48,10 +45,10 @@ public class ToStringEvaluator extends org.cqframework.cql.elm.execution.ToStrin
             return Boolean.toString((Boolean)operand);
         }
         else if (operand instanceof DateTime) {
-            return ((DateTime)operand).getPartial().toString();
+            return operand.toString();
         }
         else if (operand instanceof Time) {
-            return ((Time)operand).getPartial().toString();
+            return operand.toString();
         }
 
         throw new IllegalArgumentException(String.format("Cannot ToString a value of type %s.", operand.getClass().getName()));

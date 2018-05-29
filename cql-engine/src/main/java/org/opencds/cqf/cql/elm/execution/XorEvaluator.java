@@ -9,9 +9,6 @@ The xor (exclusive or) operator returns true if one argument is true and the oth
 If both arguments are true or both arguments are false, the result is false. Otherwise, the result is null.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class XorEvaluator extends org.cqframework.cql.elm.execution.Xor {
 
     public static Object xor(Boolean left, Boolean right) {

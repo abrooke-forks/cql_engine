@@ -14,9 +14,6 @@
 // NULL	| TRUE	NULL	NULL
 // */
 
- /**
-  * Created by Bryn on 5/25/2016.
-  */
  public class ImpliesEvaluator extends org.cqframework.cql.elm.execution.Implies {
 
      public static Object implies(Boolean left, Boolean right) {

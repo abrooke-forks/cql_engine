@@ -4,7 +4,6 @@ import org.opencds.cqf.cql.execution.Context;
 import org.opencds.cqf.cql.runtime.*;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 
 /*
 *** NOTES FOR CLINICAL OPERATORS ***
@@ -31,9 +30,6 @@ If either argument is null, or contains null elements, the result is null.
 
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class EqualEvaluator extends org.cqframework.cql.elm.execution.Equal {
 
     public static Boolean equal(Object left, Object right) {
@@ -41,9 +37,9 @@ public class EqualEvaluator extends org.cqframework.cql.elm.execution.Equal {
             return null;
         }
 
-        if (left instanceof Uncertainty && (right instanceof Integer || right instanceof Uncertainty)) {
-            return ((Uncertainty) left).equal(right);
-        }
+//        if (left instanceof Uncertainty && (right instanceof Integer || right instanceof Uncertainty)) {
+//            return ((Uncertainty) left).equal(right);
+//        }
 
         if (!left.getClass().equals(right.getClass())) {
             return false;

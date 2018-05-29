@@ -14,9 +14,6 @@ If the input cannot be interpreted as a valid Boolean value, a run-time error is
 If the argument is null, the result is null.
 */
 
-/**
- * Created by Chris Schuler on 6/14/2016
- */
 public class ToBooleanEvaluator extends org.cqframework.cql.elm.execution.ToBoolean {
 
     public static Object toBoolean(Object operand) {
@@ -46,7 +43,6 @@ public class ToBooleanEvaluator extends org.cqframework.cql.elm.execution.ToBool
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-
         return context.logTrace(this.getClass(), toBoolean(operand), operand);
     }
 }

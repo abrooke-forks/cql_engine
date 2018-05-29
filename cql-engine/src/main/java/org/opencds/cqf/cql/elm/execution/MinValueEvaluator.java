@@ -18,9 +18,6 @@ For Time, minimum returns the minimum representable time value, Time(0, 0, 0, 0)
 For any other type, attempting to invoke minimum results in an error.
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class MinValueEvaluator extends org.cqframework.cql.elm.execution.MinValue {
 
     public static Object minimum(String type) {
@@ -37,7 +34,6 @@ public class MinValueEvaluator extends org.cqframework.cql.elm.execution.MinValu
     @Override
     public Object evaluate(Context context) {
         String type = this.getValueType().getLocalPart();
-
         return context.logTrace(this.getClass(), minimum(type), type);
     }
 }

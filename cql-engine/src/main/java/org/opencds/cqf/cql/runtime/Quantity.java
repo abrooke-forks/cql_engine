@@ -6,9 +6,6 @@ import org.opencds.cqf.cql.elm.execution.EquivalentEvaluator;
 
 import java.math.BigDecimal;
 
-/**
- * Created by Bryn on 4/15/2016.
- */
 public class Quantity implements CqlType, Comparable<Quantity> {
 
     public Quantity() {

@@ -22,9 +22,6 @@ define RuntimeError:
     return cast P as Observation
 */
 
-/**
- * Created by Bryn on 5/25/2016.
- */
 public class AsEvaluator extends org.cqframework.cql.elm.execution.As {
 
     private Class resolveType(Context context) {
@@ -55,7 +52,6 @@ public class AsEvaluator extends org.cqframework.cql.elm.execution.As {
     @Override
     public Object evaluate(Context context) {
         Object operand = getOperand().evaluate(context);
-
         Class clazz = resolveType(context);
 
         return context.logTrace(this.getClass(), as(operand, clazz), operand);

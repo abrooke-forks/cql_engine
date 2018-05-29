@@ -47,11 +47,11 @@ public class Value {
         }
         else if (value instanceof DateTime) {
             DateTime dt = (DateTime)value;
-            return new DateTime(dt.getPartial().property(DateTime.getField(dt.getPartial().size() - 1)).addToCopy(1), dt.getTimezone());
+            return dt.add(new Quantity().withValue(BigDecimal.ONE).withUnit(dt.precision.getUnitFromPrecision()));
         }
         else if (value instanceof Time) {
             Time t = (Time)value;
-            return new Time(t.getPartial().property(Time.getField(t.getPartial().size() - 1)).addToCopy(1), t.getTimezone());
+            return t.add(new Quantity().withValue(BigDecimal.ONE).withUnit(t.precision.getUnitFromPrecision()));
         }
 
         throw new NotImplementedException(String.format("Successor is not implemented for type %s", value.getClass().getName()));
@@ -78,11 +78,11 @@ public class Value {
         }
         else if (value instanceof DateTime) {
             DateTime dt = (DateTime)value;
-            return new DateTime(dt.getPartial().property(DateTime.getField(dt.getPartial().size() - 1)).addToCopy(-1), dt.getTimezone());
+            return dt.add(new Quantity().withValue(BigDecimal.ONE.negate()).withUnit(dt.precision.getUnitFromPrecision()));
         }
         else if (value instanceof Time) {
             Time t = (Time)value;
-            return new Time(t.getPartial().property(Time.getField(t.getPartial().size() - 1)).addToCopy(-1), t.getTimezone());
+            return t.add(new Quantity().withValue(BigDecimal.ONE.negate()).withUnit(t.precision.getUnitFromPrecision()));
         }
 
         throw new NotImplementedException(String.format("Predecessor is not implemented for type %s", value.getClass().getName()));
@@ -99,10 +99,10 @@ public class Value {
             return new Quantity().withValue((BigDecimal)minValue(BigDecimal.class));
         }
         else if (type == DateTime.class) {
-            return new DateTime(new Partial(DateTime.fields, new int[] {0001, 1, 1, 0, 0, 0, 0}));
+            return new DateTime(1, 1, 1, 0, 0, 0, 0, null);
         }
         else if (type == Time.class) {
-            return new Time(new Partial(Time.fields, new int[] {0, 0, 0, 0}));
+            return new Time(0, 0, 0, 0, null);
         }
 
         throw new NotImplementedException(String.format("MinValue is not implemented for type %s.", type.getTypeName()));
@@ -119,10 +119,10 @@ public class Value {
             return new Quantity().withValue((BigDecimal)maxValue(BigDecimal.class));
         }
         else if (type == DateTime.class) {
-            return new DateTime(new Partial(DateTime.fields, new int[] {9999, 12, 31, 23, 59, 59, 999}));
+            return new DateTime(9999, 12, 31, 23, 59, 59, 999, null);
         }
         else if (type == Time.class) {
-            return new Time(new Partial(Time.fields, new int[] {23, 59, 59, 999}));
+            return new Time(23, 59, 59, 999, null);
         }
 
         throw new NotImplementedException(String.format("MaxValue is not implemented for type %s.", type.getTypeName()));

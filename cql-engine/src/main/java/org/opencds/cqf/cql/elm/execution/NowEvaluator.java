@@ -1,7 +1,6 @@
 package org.opencds.cqf.cql.elm.execution;
 
 import org.opencds.cqf.cql.execution.Context;
-import org.opencds.cqf.cql.runtime.DateTime;
 
 /*
 Now() DateTime
@@ -14,9 +13,6 @@ Now is defined in this way for two reasons:
       be performed with the same timezone information as the data delivered with the evaluation request.
 */
 
-/**
- * Created by Chris Schuler on 6/21/2016.
- */
 public class NowEvaluator extends org.cqframework.cql.elm.execution.Now {
 
     @Override
