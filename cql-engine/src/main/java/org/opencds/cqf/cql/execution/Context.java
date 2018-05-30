@@ -29,16 +29,16 @@ public class Context {
         this.enableExpressionCache = yayOrNay;
     }
     public boolean isExpressionInCache(String name) {
-        return this.expressionCache.containsKey(getCurrentContext() + name);
+        return this.expressionCache.containsKey(getCurrentContextValue() + name);
     }
     public boolean isExpressionCachingEnabled() {
         return this.enableExpressionCache;
     }
     public void addExpressionToCache(String name, Object result) {
-        this.expressionCache.put(getCurrentContext() + name, result);
+        this.expressionCache.put(getCurrentContextValue() + name, result);
     }
     public Object getExpressionResultFromCache(String name) {
-        return this.expressionCache.get(getCurrentContext() + name);
+        return this.expressionCache.get(getCurrentContextValue() + name);
     }
     // end caching logic
 
