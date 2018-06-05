@@ -256,9 +256,9 @@ define TimeNotEqualTrue: Interval[@T10:00:00.000, @T19:59:59.999] != Interval[@T
 define TimeNotEqualFalse: Interval[@T10:00:00.000, @T19:59:59.999] != Interval[@T10:00:00.000, @T19:59:59.999]
 
 //OnOrAfter
-define TestOnOrAfterNull: Interval[@2012-12-01, @2013-12-01] on or after null
-define TestOnOrAfterDateTrue: Interval[@2012-12-01, @2013-12-01] on or after month of @2012-11-15
-define TestOnOrAfterDateFalse: @2012-11-15 on or after month of Interval[@2012-12-01, @2013-12-01]
+define TestOnOrAfterNull: Interval[DateTime(2012, 12, 1), DateTime(2013, 12, 1)] on or after null
+define TestOnOrAfterDateTrue: Interval[DateTime(2012, 12, 1), DateTime(2013, 12, 1)] on or after month of DateTime(2012, 11, 15)
+define TestOnOrAfterDateFalse: DateTime(2012, 11, 15) on or after month of Interval[DateTime(2012, 12, 1), DateTime(2013, 12, 1)]
 define TestOnOrAfterTimeTrue: Interval[@T10:00:00.000, @T19:59:59.999] on or after hour of Interval[@T08:00:00.000, @T09:59:59.999]
 define TestOnOrAfterTimeFalse: Interval[@T10:00:00.000, @T19:59:59.999] on or after hour of Interval[@T08:00:00.000, @T11:59:59.999]
 define TestOnOrAfterIntegerTrue: Interval[6, 10] on or after 6
@@ -266,9 +266,9 @@ define TestOnOrAfterDecimalFalse: 2.5 on or after Interval[1.666, 2.50000001]
 define TestOnOrAfterQuantityTrue: 2.5 'mg' on or after Interval[1.666 'mg', 2.50000000 'mg']
 
 //OnOrBefore
-define TestOnOrBeforeNull: Interval[@2012-12-01, @2013-12-01] on or before null
-define TestOnOrBeforeDateTrue: Interval[@2012-10-01, @2012-11-01] on or before month of @2012-11-15
-define TestOnOrBeforeDateFalse: @2012-11-15 on or before month of Interval[@2012-10-01, @2013-12-01]
+define TestOnOrBeforeNull: Interval[DateTime(2012, 12, 1), DateTime(2013, 12, 1)] on or before null
+define TestOnOrBeforeDateTrue: Interval[DateTime(2012, 10, 1), DateTime(2012, 11, 1)] on or before month of DateTime(2012, 11, 15)
+define TestOnOrBeforeDateFalse: DateTime(2012, 11, 15) on or before month of Interval[DateTime(2012, 10, 1), DateTime(2013, 12, 1)]
 define TestOnOrBeforeTimeTrue: Interval[@T05:00:00.000, @T07:59:59.999] on or before hour of Interval[@T08:00:00.000, @T09:59:59.999]
 define TestOnOrBeforeTimeFalse: Interval[@T10:00:00.000, @T19:59:59.999] on or before hour of Interval[@T08:00:00.000, @T11:59:59.999]
 define TestOnOrBeforeIntegerTrue: Interval[4, 6] on or before 6
@@ -424,5 +424,5 @@ define TimeIntervalTest: Interval[@T00:00:00.000, @T23:59:59.599]
 define CollapseIntervalTestInteger: {IntegerIntervalTest, IntegerIntervalTest2, IntegerIntervalTest3}
 define InvalidIntegerInterval: Interval[5, 3]
 define InvalidIntegerIntervalA: Interval[5, 5)
-define NullStartInterval: Interval(null, @2018-06-15]
-define NullEndInterval: Interval[@2018-06-15, null)
+define NullStartInterval: Interval(null, DateTime(2018, 06, 15)]
+define NullEndInterval: Interval[DateTime(2018, 06, 15), null)

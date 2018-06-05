@@ -43,7 +43,7 @@ public class BeforeEvaluator extends org.cqframework.cql.elm.execution.Before {
         }
 
         if (left instanceof Interval && right instanceof Interval) {
-            return LessEvaluator.less(((Interval)left).getStart(), ((Interval)right).getEnd());
+            return LessEvaluator.less(((Interval)left).getEnd(), ((Interval)right).getStart());
         }
 
         else if (left instanceof Interval) {
