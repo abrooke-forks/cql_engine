@@ -14,6 +14,9 @@ import java.math.RoundingMode;
 public class Value {
 
     public static BigDecimal verifyPrecision(BigDecimal value) {
+        if (value == null) {
+            return null;
+        }
         // at most 8 decimal places
         if (value.precision() > 8) {
             return value.setScale(8, RoundingMode.FLOOR);

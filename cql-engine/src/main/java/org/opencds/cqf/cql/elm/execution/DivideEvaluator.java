@@ -50,12 +50,12 @@ public class DivideEvaluator extends org.cqframework.cql.elm.execution.Divide {
 
     else if (left instanceof Quantity && right instanceof Quantity) {
       BigDecimal value = divideHelper(((Quantity) left).getValue(), ((Quantity) right).getValue());
-      return new Quantity().withValue(Value.verifyPrecision(value)).withUnit(((Quantity) left).getUnit());
+      return value == null ? null : new Quantity().withValue(Value.verifyPrecision(value)).withUnit(((Quantity) left).getUnit());
     }
 
     else if (left instanceof Quantity && right instanceof BigDecimal) {
       BigDecimal value = divideHelper(((Quantity) left).getValue(), (BigDecimal) right);
-      return new Quantity().withValue(Value.verifyPrecision(value)).withUnit(((Quantity)left).getUnit());
+      return value == null ? null : new Quantity().withValue(Value.verifyPrecision(value)).withUnit(((Quantity)left).getUnit());
     }
 
     throw new IllegalArgumentException(

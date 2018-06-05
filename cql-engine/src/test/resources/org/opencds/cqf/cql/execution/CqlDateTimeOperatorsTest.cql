@@ -155,8 +155,11 @@ define DifferenceInDaysAA: difference in days between DateTimeEE and DateTimeFF 
 
 //Duration
 define DateTimeDurationBetweenYear: years between DateTime(2005) and DateTime(2010)
+define DurationInWeeks: weeks between @2012-03-10T22:05:09 and @2012-03-20T07:19:33
+define DurationInWeeks2: weeks between @2012-03-10T22:05:09 and @2012-03-24T07:19:33
+define DurationInWeeks3: weeks between @2012-03-10T06:05:09 and @2012-03-24T07:19:33
 define DateTimeDurationBetweenYearOffset: years between DateTime(2005, 5) and DateTime(2010, 4)
-define DateTimeDurationBetweenMonth: months between @2014-01-31 and @2014-02-01
+define DateTimeDurationBetweenMonth: months between DateTime(2014, 1, 31) and DateTime(2014, 2, 1)
 define DateTimeDurationBetweenDaysDiffYears: days between DateTime(2010, 10, 12, 12, 5) and DateTime(2008, 8, 15, 8, 8)
 // Uncertainty tests
 define DateTimeDurationBetweenUncertainInterval: days between DateTime(2014, 1, 15) and DateTime(2014, 2)
@@ -176,10 +179,6 @@ define DateTimeDurationBetweenMonthUncertain7: months between DateTime(2005) and
 define DateTime1: @2012-03-10T10:20:00
 define DateTime2: @2013-03-10T09:20:00
 define DurationInYears: years between (date from DateTime1) and (date from DateTime2)
-
-define DurationInWeeks: weeks between @2012-03-10T22:05:09 and @2012-03-20T07:19:33
-define DurationInWeeks2: weeks between @2012-03-10T22:05:09 and @2012-03-24T07:19:33
-define DurationInWeeks3: weeks between @2012-03-10T06:05:09 and @2012-03-24T07:19:33
 
 define TimeDurationBetweenHour: hours between @T20:26:15.555 and @T23:25:15.555
 define TimeDurationBetweenHourDiffPrecision: hours between @T06Z and @T07:00:00Z

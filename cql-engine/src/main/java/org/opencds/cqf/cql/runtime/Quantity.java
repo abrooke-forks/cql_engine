@@ -39,6 +39,10 @@ public class Quantity implements CqlType, Comparable<Quantity> {
         setUnit(unit);
         return this;
     }
+    public Quantity withDefaultUnit() {
+        setUnit("1");
+        return this;
+    }
 
     @Override
     public int compareTo(@Nonnull Quantity other) {
