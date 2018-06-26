@@ -24,10 +24,10 @@ public class ProperContainsEvaluator extends org.cqframework.cql.elm.execution.P
 
     public static Boolean properContains(Object left, Object right) {
         if (left instanceof Interval) {
-            Boolean startProperContains = GreaterEvaluator.greater(right, ((Interval) left).getStart());
-            Boolean endProperContains = LessEvaluator.less(right, ((Interval) left).getEnd());
-
-            return startProperContains == null ? null : endProperContains == null ? null : startProperContains && endProperContains;
+            return AndEvaluator.and(
+                    GreaterOrEqualEvaluator.greaterOrEqual(right, ((Interval) left).getStart()),
+                    LessOrEqualEvaluator.lessOrEqual(right, ((Interval) left).getEnd())
+            );
         }
 
         else if (left instanceof Iterable) {
@@ -52,10 +52,10 @@ public class ProperContainsEvaluator extends org.cqframework.cql.elm.execution.P
 
     public static Boolean properContains(Object left, Object right, String precision) {
         if (left instanceof Interval && right instanceof BaseTemporal) {
-            Boolean startProperContains = AfterEvaluator.after(right, ((Interval) left).getStart(), precision);
-            Boolean endProperContains = BeforeEvaluator.before(right, ((Interval) left).getEnd(), precision);
-
-            return startProperContains == null ? null : endProperContains == null ? null : startProperContains && endProperContains;
+            return AndEvaluator.and(
+                    SameOrAfterEvaluator.sameOrAfter(right, ((Interval) left).getStart(), precision),
+                    SameOrBeforeEvaluator.sameOrBefore(right, ((Interval) left).getEnd(), precision)
+            );
         }
 
         return properContains(left, right);

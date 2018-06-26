@@ -104,6 +104,32 @@ public class FhirTerminologyProvider implements TerminologyProvider {
         if (resolveByUrl(valueSet) == null) {
             return Collections.emptyList();
         }
+
+        boolean needsExpand = false;
+        ValueSet vs = fhirClient.read().resource(ValueSet.class).withId(valueSet.getId()).execute();
+        List<Code> codes = new ArrayList<>();
+
+        if (vs != null) {
+            if (vs.hasCompose()) {
+                if (vs.getCompose().hasInclude()) {
+                    for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
+                        if (include.hasValueSet() || include.hasFilter()) {
+                            needsExpand = true;
+                            break;
+                        }
+                        for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
+                            if (concept.hasCode()) {
+                                codes.add(new Code().withCode(concept.getCode()).withSystem(include.getSystem()));
+                            }
+                        }
+                    }
+                    if (!needsExpand) {
+                        return codes;
+                    }
+                }
+            }
+        }
+
         Parameters respParam = fhirClient
                 .operation()
                 .onInstance(new IdType("ValueSet", valueSet.getId()))
@@ -112,7 +138,6 @@ public class FhirTerminologyProvider implements TerminologyProvider {
                 .execute();
 
         ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-        List<Code> codes = new ArrayList<>();
         for (ValueSet.ValueSetExpansionContainsComponent codeInfo : expanded.getExpansion().getContains()) {
             Code nextCode = new Code()
                     .withCode(codeInfo.getCode())

@@ -37,7 +37,7 @@ public class Context {
     private boolean enableTraceLogging = false;
 
     private org.opencds.cqf.cql.runtime.DateTime evaluationDateTime =
-            org.opencds.cqf.cql.runtime.DateTime.fromJavaDate(new Date(System.currentTimeMillis()));
+            org.opencds.cqf.cql.runtime.DateTime.fromJavaDate(new java.util.Date(System.currentTimeMillis()));
 
     public Context(Library library) {
         init(library);

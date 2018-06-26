@@ -1,6 +1,6 @@
 library ArithmeticFunctions version '1'
 
-context Population
+context Patient
 
 //Abs
 define AbsNull: Abs(null as Integer)
@@ -27,8 +27,8 @@ define CeilingNeg1D1: Ceiling(-1.1)
 define Ceiling1I: Ceiling(1)
 
 //Divide
-define DivideNull: 1 / null
-define Divide10: 1 / 0
+//define DivideNull: 1 / null
+/*define Divide10: 1 / 0
 define Divide01: 0 / 1
 define Divide11: 1 / 1
 define Divide1d1d: 1.0 / 1.0
@@ -37,7 +37,7 @@ define Divide1Q1: 1'g/cm3' / 1.0
 define Divide1Q1Q: 1'g/cm3' / 1'g/cm3'
 define Divide10I5D: 10 / 5.0
 define Divide10I5I: 10 / 5
-define Divide10Q5I: 10.0 'g' / 5
+define Divide10Q5I: 10.0 'g' / 5*/
 
 //Floor
 define FloorNull: Floor(null as Decimal)

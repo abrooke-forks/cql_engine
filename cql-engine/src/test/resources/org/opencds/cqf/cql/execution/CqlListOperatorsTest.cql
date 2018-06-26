@@ -33,13 +33,13 @@ define DescendentsEmptyList: (null).descendents()
 
 //Distinct
 define DistinctEmptyList: distinct {}
-define DistinctNullNullNull: distinct { null, null, null}
-define DistinctANullANull: distinct { 'a', null, 'a', null}
-define Distinct112233: distinct { 1, 1, 2, 2, 3, 3}
-define Distinct123123: distinct { 1, 2, 3, 1, 2, 3}
-define DistinctAABBCC: distinct { 'a', 'a', 'b', 'b', 'c', 'c'}
-define DistinctABCABC: distinct { 'a', 'b', 'c', 'a', 'b', 'c'}
-define DistinctDateTime: distinct { DateTime(2012, 10, 5), DateTime(2012, 1, 1), DateTime(2012, 1, 1)}
+define DistinctNullNullNull: distinct { null, null, null }
+define DistinctANullANull: distinct { 'a', null, 'a', null }
+define Distinct112233: distinct { 1, 1, 2, 2, 3, 3 }
+define Distinct123123: distinct { 1, 2, 3, 1, 2, 3 }
+define DistinctAABBCC: distinct { 'a', 'a', 'b', 'b', 'c', 'c' }
+define DistinctABCABC: distinct { 'a', 'b', 'c', 'a', 'b', 'c' }
+define DistinctDateTime: distinct { DateTime(2012, 10, 5), DateTime(2012, 1, 1), DateTime(2012, 1, 1) }
 define DistinctTime: distinct { @T15:59:59.999, @T20:59:59.999, @T20:59:59.999 }
 
 //Equal
@@ -56,7 +56,7 @@ define EqualTimeTrue: { @T15:59:59.999, @T20:59:59.999, @T20:59:59.999 } = { @T1
 define EqualTimeFalse: { @T15:59:59.999, @T20:59:59.999, @T20:59:59.999 } = { @T10:59:59.999, @T20:59:59.999, @T20:59:59.999 }
 
 //Except
-define ExceptEmptyListAndEmptyList: Except({}, {})
+define ExceptEmptyListAndEmptyList: {} except {}
 define Except1234And23: { 1, 2, 3, 4 } except { 2, 3 }
 define Except23And1234: { 2, 3 } except { 1, 2, 3, 4 }
 define ExceptDateTimeList: { DateTime(2012, 5, 10), DateTime(2014, 12, 10), DateTime(2010, 1, 1)} except {DateTime(2014, 12, 10), DateTime(2010, 1, 1) }
@@ -109,8 +109,7 @@ define IncludesDateTimeFalse: {DateTime(2001, 9, 11), DateTime(2012, 5, 10), Dat
 define IncludesTimeTrue: { @T02:29:15.156, @T15:59:59.999, @T20:59:59.999 } includes @T15:59:59.999
 define IncludesTimeFalse: { @T02:29:15.156, @T15:59:59.999, @T20:59:59.999 } includes @T16:59:59.999
 define IncludesNullLeft: null includes {2}
-// this test is going to the ContainsEvaluator
-// define IncludesNullRight: {'s', 'a', 'm'} includes null
+define IncludesNullRight: {'s', 'a', 'm'} includes null
 
 //IncludedIn
 define IncludedInEmptyAndEmpty: {} included in {}
@@ -122,8 +121,7 @@ define IncludedInDateTimeTrue: { DateTime(2012, 5, 10)} included in {DateTime(20
 define IncludedInDateTimeFalse: {DateTime(2012, 5, 11)} included in {DateTime(2001, 9, 11), DateTime(2012, 5, 10), DateTime(2014, 12, 10)}
 define IncludedInTimeTrue: @T15:59:59.999 included in { @T02:29:15.156, @T15:59:59.999, @T20:59:59.999 }
 define IncludedInTimeFalse: @T16:59:59.999 included in { @T02:29:15.156, @T15:59:59.999, @T20:59:59.999 }
-// the following expression is going to the InEvaluator
-// define IncludedInNullLeft: null included in {2}
+define IncludedInNullLeft: null included in {2}
 define IncludedInNullRight: {'s', 'a', 'm'} included in null
 
 //Indexer
@@ -206,18 +204,27 @@ define ProperIncludesDateTimeFalse:       {DateTime(2001, 9, 11), DateTime(2012,
 define ProperIncludesTimeTrue:            { @T15:59:59.999, @T20:59:59.999, @T20:59:49.999 } properly includes { @T15:59:59.999, @T20:59:59.999 }
 define ProperIncludesTimeFalse:           { @T15:59:59.999, @T20:59:59.999, @T20:59:49.999 } properly includes { @T15:59:59.999, @T20:59:59.999, @T14:59:22.999 }
 define ProperlyIncludesNullLeft: null properly includes {2}
+// Point casting
+define ProperContainsPointMRightFalse: {'s', 'u', 'n'} properly includes 'm'
+define ProperContainsPointNullRightTrue: {'s', 'u', 'n'} properly includes null
+define ProperContainsPointTimeTrue: { @T15:59:59, @T20:59:59.999, @T20:59:49.999 } properly includes @T15:59:59
+define ProperContainsPointTimeNull: { @T15:59:59.999, @T20:59:59.999, @T20:59:49.999 } properly includes @T15:59:59
 
 //ProperContains
+/*
 define ProperContainsNullRightFalse: {'s', 'u', 'n'} properly includes null
 define ProperContainsNullRightTrue: {'s', 'u', 'n', null} properly includes null
 define ProperContainsTimeTrue: { @T15:59:59, @T20:59:59.999, @T20:59:49.999 } properly includes @T15:59:59
 define ProperContainsTimeNull: { @T15:59:59.999, @T20:59:59.999, @T20:59:49.999 } properly includes @T15:59:59
+*/
 
 //ProperIn
+/*
 define ProperInNullRightFalse: null properly included in {'s', 'u', 'n'}
 define ProperInNullRightTrue: null properly included in {'s', 'u', 'n', null}
 define ProperInTimeTrue: @T15:59:59 properly included in { @T15:59:59, @T20:59:59.999, @T20:59:49.999 }
 define ProperInTimeNull: @T15:59:59 properly included in { @T15:59:59.999, @T20:59:59.999, @T20:59:49.999 }
+*/
 
 //ProperlyIncludedIn
 define ProperIncludedInEmptyAndEmpty: {} properly included in {}
@@ -230,6 +237,11 @@ define ProperIncludedInDateTimeFalse: {DateTime(2001, 9, 11), DateTime(2012, 5, 
 define ProperIncludedInTimeTrue: { @T15:59:59.999, @T20:59:59.999 } properly included in { @T15:59:59.999, @T20:59:59.999, @T20:59:49.999 }
 define ProperIncludedInTimeFalse: { @T15:59:59.999, @T20:59:59.999, @T14:59:22.999 } properly included in { @T15:59:59.999, @T20:59:59.999, @T20:59:49.999 }
 define ProperlyIncludedInNulRight: {'s', 'u', 'n'} properly included in null
+// Point casting
+define ProperlyIncludedInPointJRightFalse: 'j' properly included in {'s', 'u', 'n'}
+define ProperlyIncludedInPointNullRightTrue: null properly included in {'s', 'u', 'n'}
+define ProperlyIncludedInPointTimeTrue: @T15:59:59 properly included in { @T15:59:59, @T20:59:59.999, @T20:59:49.999 }
+define ProperlyIncludedInPointTimeNull: @T15:59:59 properly included in { @T15:59:59.999, @T20:59:59.999, @T20:59:49.999 }
 
 //SingletonFrom
 define SingletonFromEmpty: singleton from {}

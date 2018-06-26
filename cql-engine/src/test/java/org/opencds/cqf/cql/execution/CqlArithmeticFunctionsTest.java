@@ -97,7 +97,9 @@ public class CqlArithmeticFunctionsTest extends CqlExecutionTestBase {
     //@Test
     public void testDivide() throws JAXBException {
         Context context = new Context(library);
-        Object result = context.resolveExpressionRef("DivideNull").getExpression().evaluate(context);
+        Object result;
+
+        result = context.resolveExpressionRef("DivideNull").getExpression().evaluate(context);
         assertThat(result, is(nullValue()));
 
         result = context.resolveExpressionRef("Divide10").getExpression().evaluate(context);

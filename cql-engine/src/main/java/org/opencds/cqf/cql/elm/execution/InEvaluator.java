@@ -10,12 +10,14 @@ import org.opencds.cqf.cql.runtime.Time;
 *** NOTES FOR INTERVAL ***
 in(point T, argument Interval<T>) Boolean
 
-The in operator for intervals returns true if the given point is greater than or equal to the
-    starting point of the interval, and less than or equal to the ending point of the interval.
-    For open interval boundaries, exclusive comparison operators are used.
-    For closed interval boundaries, if the interval boundary is null, the result of the boundary comparison is considered true.
-If precision is specified and the point type is a date/time type, comparisons used in the
-    operation are performed at the specified precision.
+The in operator for intervals returns true if the given point is greater than or equal to the starting point of
+    the interval, and less than or equal to the ending point of the interval. For open interval boundaries, exclusive
+    comparison operators are used. For closed interval boundaries, if the interval boundary is null, the result of
+    the boundary comparison is considered true.
+
+If precision is specified and the point type is a date/time type, comparisons used in the operation are performed
+    at the specified precision.
+
 If either argument is null, the result is null.
 
 */
@@ -28,8 +30,8 @@ The in operator for lists returns true if the given element is in the given list
 This operator uses the notion of equivalence to determine whether or not the element being searched for
     is equivalent to any element in the list. In particular this means that if the list contains a null,
     and the element being searched for is null, the result will be true.
-If the left argument is null, the result is null. If the right argument is null, the result is false.
-
+If the list argument is null, the result is null.
+If the element argument is null, the result is true if the list contains at least one null element, and false otherwise.
 */
 
 /**
@@ -53,6 +55,10 @@ public class InEvaluator extends org.cqframework.cql.elm.execution.In {
         }
 
         else if (right instanceof Interval) {
+            if (left == null) {
+                return null;
+            }
+
             Object rightStart = ((Interval) right).getStart();
             Object rightEnd = ((Interval) right).getEnd();
 
@@ -64,25 +70,21 @@ public class InEvaluator extends org.cqframework.cql.elm.execution.In {
                 return true;
             }
 
-            else if (rightStart == null || rightEnd == null || left == null) {
+            else if (rightStart == null || rightEnd == null) {
                 return null;
             }
 
             else if (rightStart instanceof BaseTemporal) {
-                Boolean sameOrAfter = SameOrAfterEvaluator.sameOrAfter(left, rightStart, precision);
-                Boolean sameOrBefore = SameOrBeforeEvaluator.sameOrBefore(left, rightEnd, precision);
-                if (sameOrAfter == null || sameOrBefore == null) {
-                    return null;
-                }
-                return sameOrAfter && sameOrBefore;
+                return AndEvaluator.and(
+                        SameOrAfterEvaluator.sameOrAfter(left, rightStart, precision),
+                        SameOrBeforeEvaluator.sameOrBefore(left, rightEnd, precision)
+                );
             }
 
-            Boolean greaterOrEqual = GreaterOrEqualEvaluator.greaterOrEqual(left, rightStart);
-            Boolean lessOrEqual = LessOrEqualEvaluator.lessOrEqual(left, rightEnd);
-            if (greaterOrEqual == null || lessOrEqual == null) {
-                return null;
-            }
-            return greaterOrEqual && lessOrEqual;
+            return AndEvaluator.and(
+                    GreaterOrEqualEvaluator.greaterOrEqual(left, rightStart),
+                    LessOrEqualEvaluator.lessOrEqual(left, rightEnd)
+            );
         }
 
         throw new IllegalArgumentException(String.format("Cannot In arguments of type '%s' and '%s'.", left.getClass().getName(), right.getClass().getName()));
