@@ -14,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -84,12 +85,16 @@ public class TestFhirDataProviderDstu3 extends FhirExecutionTestBase {
 
         dstu3Provider.fhirClient.update().resource(patient).withId(patientId).execute();
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+
         MedicationRequest request = new MedicationRequest();
         request.setIntent(MedicationRequest.MedicationRequestIntent.ORDER)
                 .setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE)
                 .setMedication(new CodeableConcept().addCoding(new Coding().setCode("1049502").setSystem("http://www.nlm.nih.gov/research/umls/rxnorm")))
                 .setSubject(new Reference("Patient/" + patientId))
-                .setAuthoredOn(new Date());
+                .setAuthoredOn(calendar.getTime());
 
         dstu3Provider.fhirClient.update().resource(request).withId(patientId).execute();
 

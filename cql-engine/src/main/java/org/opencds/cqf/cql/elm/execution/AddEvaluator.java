@@ -61,7 +61,7 @@ public class AddEvaluator extends org.cqframework.cql.elm.execution.Add {
         }
 
         else if (left instanceof Quantity && right instanceof Quantity) {
-            return new Quantity().withValue((((Quantity)left).getValue()).add(((Quantity)right).getValue())).withUnit(((Quantity)left).getUnit());
+            return ((Quantity) left).add((Quantity) right);
         }
 
         // +(DateTime, Quantity)

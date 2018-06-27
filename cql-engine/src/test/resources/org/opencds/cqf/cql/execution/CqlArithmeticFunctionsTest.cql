@@ -15,6 +15,7 @@ define AddNull: 1 + null
 define Add11: 1 + 1
 define Add1D1D: 1.0 + 1.0
 define Add1Q1Q: 1'g/cm3' + 1'g/cm3'
+define AddQuantityConversion: 1'm' + 5'cm'
 define AddIAndD: 1 + 2.0
 
 //Ceiling
@@ -33,11 +34,13 @@ define Divide01: 0 / 1
 define Divide11: 1 / 1
 define Divide1d1d: 1.0 / 1.0
 define Divide103: 10 / 3
-define Divide1Q1: 1'g/cm3' / 1.0
-define Divide1Q1Q: 1'g/cm3' / 1'g/cm3'
 define Divide10I5D: 10 / 5.0
 define Divide10I5I: 10 / 5
 define Divide10Q5I: 10.0 'g' / 5*/
+define Divide1Q1: 1'g/cm3' / 1.0
+define Divide1Q1Q: 1'g/cm3' / 1'g/cm3'
+define Divide1CMBy2CM : 2.0 'cm' / 1.0 'cm'
+define DivideQuantityConversion: 1'm2' / 5'cm'
 
 //Floor
 define FloorNull: Floor(null as Decimal)
@@ -106,6 +109,8 @@ define Multiply1By1 : 1 * 1
 define Multiply1DBy2D : 1.0 * 2.0
 define Multiply1IBy2D: 1 * 2.0
 define Multiply1CMBy2CM : 1.0 'cm' * 2.0 'cm'
+define Multiply1CMBy2 : 1.0 'cm' * 2.0
+define MultiplyQuantityConversion: 1'm' * 5'cm'
 
 //Negate
 define NegateNull: -(null as Integer)
@@ -164,6 +169,7 @@ define SubtractNull: 1 - null
 define Subtract1And1 : 1 - 1
 define Subtract1DAnd2D : 1.0 - 2.0
 define Subtract1CMAnd2CM : 1.0 'cm' - 2.0 'cm'
+define SubtractQuantityConversion: 1'm' - 5'cm'
 define Subtract2And11D: 2 - 1.1
 
 //Successor

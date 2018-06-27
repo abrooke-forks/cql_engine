@@ -49,8 +49,7 @@ public class DivideEvaluator extends org.cqframework.cql.elm.execution.Divide {
     }
 
     else if (left instanceof Quantity && right instanceof Quantity) {
-      BigDecimal value = divideHelper(((Quantity) left).getValue(), ((Quantity) right).getValue());
-      return value == null ? null : new Quantity().withValue(Value.verifyPrecision(value)).withUnit(((Quantity) left).getUnit());
+      return ((Quantity) left).divide((Quantity) right);
     }
 
     else if (left instanceof Quantity && right instanceof BigDecimal) {

@@ -47,18 +47,18 @@ public class SubtractEvaluator extends org.cqframework.cql.elm.execution.Subtrac
         }
 
         // -(Integer, Integer)
-        if (left instanceof Integer) {
+        if (left instanceof Integer && right instanceof Integer) {
             return (Integer)left - (Integer)right;
         }
 
         // -(Decimal, Decimal)
-        else if (left instanceof BigDecimal) {
+        else if (left instanceof BigDecimal && right instanceof BigDecimal) {
             return ((BigDecimal)left).subtract((BigDecimal)right);
         }
 
         // -(Quantity, Quantity)
-        else if (left instanceof Quantity) {
-            return new Quantity().withValue((((Quantity)left).getValue()).subtract(((Quantity)right).getValue())).withUnit(((Quantity)left).getUnit());
+        else if (left instanceof Quantity && right instanceof Quantity) {
+            return ((Quantity) left).subtract((Quantity) right);
         }
 
         // -(DateTime, Quantity)
